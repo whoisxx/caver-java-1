@@ -125,6 +125,7 @@ public class KlayCredentials {
      * @param privateKey private key for transaction signing
      * @return KlayCredentials
      */
+
     public static KlayCredentials create(String privateKey) {
         ECKeyPair ecKeyPair = ECKeyPair.create(Numeric.toBigInt(privateKey));
         String address = Numeric.prependHexPrefix(Keys.getAddress(ecKeyPair));
@@ -138,6 +139,7 @@ public class KlayCredentials {
      * @param ecKeyPair ecKeyPair for transaction signing
      * @return KlayCredentials
      */
+
     public static KlayCredentials create(ECKeyPair ecKeyPair) {
         String address = Numeric.prependHexPrefix(Keys.getAddress(ecKeyPair));
         return create(ecKeyPair, address);
