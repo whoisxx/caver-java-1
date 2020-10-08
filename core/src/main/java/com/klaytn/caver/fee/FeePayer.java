@@ -35,9 +35,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * @deprecated Please use {@link com.klaytn.caver.transaction.AbstractFeeDelegatedTransaction} instead.
+ * @see com.klaytn.caver.transaction.AbstractFeeDelegatedWithRatioTransaction
+ */
+@Deprecated
 public class FeePayer {
 
-    final static String EMPTY_FEE_PAYER_ADDRESS = "0x30";
+    final static String EMPTY_FEE_PAYER_ADDRESS = "0x";
     private KlayCredentials credentials;
     private int chainId;
 

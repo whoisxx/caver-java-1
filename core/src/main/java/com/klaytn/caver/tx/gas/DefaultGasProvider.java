@@ -20,17 +20,26 @@
 
 package com.klaytn.caver.tx.gas;
 
+import com.klaytn.caver.Caver;
 import com.klaytn.caver.tx.ManagedTransaction;
 import com.klaytn.caver.tx.SmartContract;
 import org.web3j.tx.gas.StaticGasProvider;
 
 import java.math.BigInteger;
 
+/**
+ * @deprecated This class is deprecated since caver-java:1.5.0
+ */
+@Deprecated
 public class DefaultGasProvider extends StaticGasProvider {
     public static final BigInteger GAS_LIMIT = SmartContract.GAS_LIMIT;
     public static final BigInteger GAS_PRICE = ManagedTransaction.GAS_PRICE;
 
     public DefaultGasProvider() {
         super(GAS_PRICE, GAS_LIMIT);
+    }
+
+    public DefaultGasProvider(Caver caver) throws Exception{
+        super(caver.klay().getGasPrice().send().getValue(), GAS_LIMIT);
     }
 }

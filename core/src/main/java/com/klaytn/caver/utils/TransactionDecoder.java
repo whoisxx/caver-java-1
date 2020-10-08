@@ -22,6 +22,10 @@ import org.web3j.utils.Numeric;
 import java.util.HashMap;
 import java.util.function.Function;
 
+/**
+ * @deprecated Please use {@link com.klaytn.caver.transaction.TransactionDecoder} instead.
+ */
+@Deprecated
 public class TransactionDecoder {
     private static HashMap<TxType.Type, Function<byte[], AbstractTxType>> typeMap
             = new HashMap<TxType.Type, Function<byte[], AbstractTxType>>() {
@@ -39,6 +43,7 @@ public class TransactionDecoder {
             put(TxType.Type.FEE_DELEGATED_VALUE_TRANSFER_MEMO_WITH_RATIO, TxTypeFeeDelegatedValueTransferMemoWithRatio::decodeFromRawTransaction);
             put(TxType.Type.FEE_DELEGATED_VALUE_TRANSFER_WITH_RATIO, TxTypeFeeDelegatedValueTransferWithRatio::decodeFromRawTransaction);
 
+            put(TxType.Type.LEGACY, TxTypeLegacyTransaction::decodeFromRawTransaction);
             put(TxType.Type.ACCOUNT_UPDATE, TxTypeAccountUpdate::decodeFromRawTransaction);
             put(TxType.Type.VALUE_TRANSFER, TxTypeValueTransfer::decodeFromRawTransaction);
             put(TxType.Type.VALUE_TRANSFER_MEMO, TxTypeValueTransferMemo::decodeFromRawTransaction);

@@ -23,6 +23,10 @@ import com.klaytn.caver.tx.type.TxTypeSmartContractExecution;
 
 import java.math.BigInteger;
 
+/**
+ * @deprecated Please use {@link com.klaytn.caver.transaction.type.SmartContractExecution} instead.
+ */
+@Deprecated
 public class SmartContractExecutionTransaction extends TransactionTransformer<SmartContractExecutionTransaction> {
 
     private String recipient;
@@ -38,9 +42,22 @@ public class SmartContractExecutionTransaction extends TransactionTransformer<Sm
         this.payload = payload;
     }
 
+    private SmartContractExecutionTransaction(String from, String recipient, BigInteger amount,
+                                              byte[] payload, BigInteger gasPrice, BigInteger gasLimit) {
+        super(from, gasPrice, gasLimit);
+        this.recipient = recipient;
+        this.amount = amount;
+        this.payload = payload;
+    }
+
     public static SmartContractExecutionTransaction create(String from, String recipient, BigInteger amount,
                                                            byte[] payload, BigInteger gasLimit) {
         return new SmartContractExecutionTransaction(from, recipient, amount, payload, gasLimit);
+    }
+
+    public static SmartContractExecutionTransaction create(String from, String recipient, BigInteger amount,
+                                                           byte[] payload, BigInteger gasPrice, BigInteger gasLimit) {
+        return new SmartContractExecutionTransaction(from, recipient, amount, payload, gasPrice, gasLimit);
     }
 
     public SmartContractExecutionTransaction feeRatio(BigInteger feeRatio) {

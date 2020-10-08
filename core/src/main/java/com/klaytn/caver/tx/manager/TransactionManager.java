@@ -40,6 +40,10 @@ import org.web3j.protocol.exceptions.TransactionException;
 import java.io.IOException;
 import java.util.Set;
 
+/**
+ * @deprecated This class is deprecated since caver-java:1.5.0
+ */
+@Deprecated
 public class TransactionManager {
 
     private Caver caver;
@@ -132,7 +136,7 @@ public class TransactionManager {
     /**
      * The result of signing a transaction is added to the raw transaction and returned
      *
-     * @param txType
+     * @param txType Transaction Type Object to Sign
      * @return signed raw transaction
      */
     public KlayRawTransaction sign(AbstractTxType txType) {
@@ -149,7 +153,7 @@ public class TransactionManager {
     /**
      * The result of signing a transaction is added to the raw transaction and returned
      *
-     * @param klayRawTransaction
+     * @param klayRawTransaction The RLP-encoded transaction(rawTransaction) string to sign.
      * @return signed raw transaction
      */
     public KlayRawTransaction sign(String klayRawTransaction) {
@@ -157,6 +161,12 @@ public class TransactionManager {
         return sign(txType);
     }
 
+    /**
+     * The result of signing a transaction is added to the raw transaction and returned
+     *
+     * @param transactionTransformer TransactionTransformer Object to Sign
+     * @return signed raw transaction
+     */
     public KlayRawTransaction sign(TransactionTransformer transactionTransformer) {
         KlayRawTransaction result = null;
         try {

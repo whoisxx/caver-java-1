@@ -22,14 +22,21 @@ package com.klaytn.caver.utils;
 
 import com.klaytn.caver.crypto.KlaySignatureData;
 import org.web3j.crypto.Sign;
+import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
 
-
+/**
+ * @deprecated This class is deprecated since caver-java:1.5.0
+ */
+@Deprecated
 public class KlaySignatureDataUtils {
+    /**
+     * @deprecated This method replaced by {@link com.klaytn.caver.wallet.keyring.SignatureData#makeEIP155Signature(int)}
+     */
     public static KlaySignatureData createEip155KlaySignatureData(
             Sign.SignatureData signatureData, int chainId) {
-        int v = (signatureData.getV() + chainId * 2) + 8;
+        int v = (Numeric.toBigInt(signatureData.getV()).intValue() + chainId * 2) + 8;
         return new KlaySignatureData(BigInteger.valueOf(v).toByteArray(), signatureData.getR(), signatureData.getS());
     }
 

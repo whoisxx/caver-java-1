@@ -22,6 +22,10 @@ import com.klaytn.caver.utils.Convert;
 
 import java.math.BigInteger;
 
+/**
+ * @deprecated This class is deprecated since caver-java:1.5.0
+ */
+@Deprecated
 public abstract class TransactionTransformer<T extends TransactionTransformer> {
 
     private BigInteger nonce;
@@ -58,6 +62,12 @@ public abstract class TransactionTransformer<T extends TransactionTransformer> {
     public TransactionTransformer(String from, BigInteger gasLimit) {
         this.from = from;
         this.gasLimit = gasLimit;
+    }
+
+    public TransactionTransformer(String from, BigInteger gasPrice, BigInteger gasLimit) {
+        this.from = from;
+        this.gasLimit = gasLimit;
+        this.gasPrice = gasPrice;
     }
 
     public BigInteger getNonce() {

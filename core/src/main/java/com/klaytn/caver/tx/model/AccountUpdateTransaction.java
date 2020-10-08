@@ -24,6 +24,10 @@ import com.klaytn.caver.tx.type.TxTypeFeeDelegatedAccountUpdateWithRatio;
 
 import java.math.BigInteger;
 
+/**
+ * @deprecated Please use {@link com.klaytn.caver.transaction.type.AccountUpdate} instead.
+ */
+@Deprecated
 public class AccountUpdateTransaction extends TransactionTransformer<AccountUpdateTransaction> {
 
     private AccountKey accountKey;
@@ -34,8 +38,17 @@ public class AccountUpdateTransaction extends TransactionTransformer<AccountUpda
         this.accountKey = accountKey;
     }
 
+    private AccountUpdateTransaction(String from, AccountKey accountKey, BigInteger gasPrice, BigInteger gasLimit) {
+        super(from, gasPrice, gasLimit);
+        this.accountKey = accountKey;
+    }
+
     public static AccountUpdateTransaction create(String from, AccountKey accountKey, BigInteger gasLimit) {
         return new AccountUpdateTransaction(from, accountKey, gasLimit);
+    }
+
+    public static AccountUpdateTransaction create(String from, AccountKey accountKey, BigInteger gasPrice, BigInteger gasLimit) {
+        return new AccountUpdateTransaction(from, accountKey, gasPrice, gasLimit);
     }
 
     public AccountUpdateTransaction feeRatio(BigInteger feeRatio) {

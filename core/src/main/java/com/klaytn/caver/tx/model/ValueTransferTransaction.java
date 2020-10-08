@@ -20,6 +20,10 @@ import com.klaytn.caver.tx.type.*;
 
 import java.math.BigInteger;
 
+/**
+ * @deprecated Please use {@link com.klaytn.caver.transaction.type.ValueTransfer} instead.
+ */
+@Deprecated
 public class ValueTransferTransaction extends TransactionTransformer<ValueTransferTransaction> {
 
     private String to;
@@ -33,8 +37,18 @@ public class ValueTransferTransaction extends TransactionTransformer<ValueTransf
         this.amount = amount;
     }
 
+    private ValueTransferTransaction(String from, String to, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit) {
+        super(from, gasPrice, gasLimit);
+        this.to = to;
+        this.amount = amount;
+    }
+
     public static ValueTransferTransaction create(String from, String to, BigInteger amount, BigInteger gasLimit) {
         return new ValueTransferTransaction(from, to, amount, gasLimit);
+    }
+
+    public static ValueTransferTransaction create(String from, String to, BigInteger amount, BigInteger gasPrice, BigInteger gasLimit) {
+        return new ValueTransferTransaction(from, to, amount, gasPrice, gasLimit);
     }
 
     public ValueTransferTransaction memo(String memo) {

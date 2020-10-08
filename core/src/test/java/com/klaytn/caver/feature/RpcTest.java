@@ -303,23 +303,6 @@ public class RpcTest {
     }
 
     @Test
-    public void testGetWork() throws Exception {
-        Response<List<String>> response = caver.klay().getWork().send();
-        List<String> result = response.getResult();
-        assertEquals(3, result.size());
-        assertNotNull(result.get(0));
-        assertNotNull(result.get(1));
-        assertNotNull(result.get(2));
-    }
-
-    @Test
-    public void testIsMining() throws Exception {
-        Boolean result = caver.klay().isMining().send();
-        boolean isMining = result.getResult();
-        assertTrue(isMining);
-    }
-
-    @Test
     public void testIsSyncing() throws Exception {
         KlaySyncing response = caver.klay().isSyncing().send();
         KlaySyncing.Result result = response.getResult();
@@ -492,13 +475,6 @@ public class RpcTest {
         Bytes20 response = caver.klay().getRewardbase().send();
         // Result - If requested from non-CN nodes
         assertEquals("rewardbase must be explicitly specified", response.getError().getMessage());
-    }
-
-    @Test
-    public void testIsWriteThroughCaching() throws Exception {
-        Boolean response = caver.klay().isWriteThroughCaching().send();
-        java.lang.Boolean result = response.getResult();
-        assertFalse(result);  // It is false by default.
     }
 
     @Test

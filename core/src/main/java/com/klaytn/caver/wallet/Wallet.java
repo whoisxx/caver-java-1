@@ -21,6 +21,7 @@
 package com.klaytn.caver.wallet;
 
 import com.klaytn.caver.crypto.KlayCredentials;
+import com.klaytn.caver.utils.SecureRandomUtils;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator;
 import org.bouncycastle.crypto.generators.SCrypt;
@@ -44,6 +45,12 @@ import java.util.*;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+/**
+ * @deprecated please see below class and function
+ * {@link com.klaytn.caver.wallet.keyring.AbstractKeyring#encrypt(String)}
+ * {@link com.klaytn.caver.wallet.keyring.KeyringFactory#decrypt(String, String)}
+ */
+@Deprecated
 public class Wallet {
 
     static final int PRIVATE_KEY_SIZE = 32;
@@ -349,8 +356,10 @@ public class Wallet {
         if (walletFile.getVersion() == VERSION_3) {
             WalletFile.Crypto crypto = walletFile.getCrypto();
             validateCrypto(crypto);
+            return;
         }
 
+        // Validate current version
         List keyRing = walletFile.getKeyring();
         if (keyRing.get(0) instanceof WalletFile.Crypto) {
             for (WalletFile.Crypto crypto : (List<WalletFile.Crypto>)keyRing) {
