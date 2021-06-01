@@ -26,7 +26,7 @@ check_test_network: &check_test_network
   run:
     name: "Check test network"
     command: |
-        MAXRETRY=300
+        MAXRETRY=600
         RETRY=0
         while [ $RETRY -lt $MAXRETRY ]
         do
@@ -56,7 +56,7 @@ build_test: &build_test
     name: "Build and test"
     command: |
         ./gradlew clean
-        ./gradlew build --scan --debug
+        ./gradlew build --debug
 
 jobs:
   build:
@@ -94,7 +94,7 @@ jobs:
             version=$(.circleci/version.sh)
             sed -i "s/version '.*'/version '${version}-android'/" build.gradle 
             sed -i "s/ext.web3jVersion = '.*'/ext.web3jVersion = '$web3j_version-android'/" build.gradle 
-            sed -i "s/java.util.concurrent.CompletableFuture/java8.util.concurrent.CompletableFuture/" core/src/test/java/com/klaytn/caver/scenario/FastTransactionManagerIT.java
+            sed -i "s/java.util.concurrent.CompletableFuture/java8.util.concurrent.CompletableFuture/" core/src/test/java/com/klaytn/caver/legacy/scenario/FastTransactionManagerIT.java
 
             if [ -z "$CIRCLE_TAG" ]; then
               echo "this is not RC version"
@@ -102,7 +102,7 @@ jobs:
               echo "trigger CIRCLE_TAG $CIRCLE_TAG"
               sed -i "s/version '.*'/version '${CIRCLE_TAG:1}-android'/" build.gradle
               sed -i "s/ext.web3jVersion = '.*'/ext.web3jVersion = '$web3j_version-android'/" build.gradle
-              sed -i "s/java.util.concurrent.CompletableFuture/java8.util.concurrent.CompletableFuture/" core/src/test/java/com/klaytn/caver/scenario/FastTransactionManagerIT.java
+              sed -i "s/java.util.concurrent.CompletableFuture/java8.util.concurrent.CompletableFuture/" core/src/test/java/com/klaytn/caver/legacy/scenario/FastTransactionManagerIT.java
             fi
 
             awk '/version '\''/' build.gradle
@@ -229,9 +229,9 @@ jobs:
               version=v$(.circleci/version.sh)
 
               echo "Publishing a major release! version=$version"
-              #./gradlew release --stacktrace --debug
-              echo "./gradlew release --stacktrace --debug"
-              #./gradlew bintrayUpload --stacktrace --debug
+              ./gradlew clean build --stacktrace --debug
+              ./gradlew clean publish --stacktrace --debug
+              ./gradlew closeAndReleaseRepository --stacktrace --debug
 
 
   android_publish:
@@ -249,7 +249,7 @@ jobs:
               version=$(.circleci/version.sh)
               sed -i "s/version '.*'/version '${version}-android'/" build.gradle
               sed -i "s/ext.web3jVersion = '.*'/ext.web3jVersion = '$web3j_version-android'/" build.gradle 
-              sed -i "s/java.util.concurrent.CompletableFuture/java8.util.concurrent.CompletableFuture/" core/src/test/java/com/klaytn/caver/scenario/FastTransactionManagerIT.java
+              sed -i "s/java.util.concurrent.CompletableFuture/java8.util.concurrent.CompletableFuture/" core/src/test/java/com/klaytn/caver/legacy/scenario/FastTransactionManagerIT.java
 
               if [ -z "$CIRCLE_TAG" ]; then
                 echo "this is not RC version"
@@ -257,14 +257,14 @@ jobs:
                 echo "trigger CIRCLE_TAG $CIRCLE_TAG"
                 sed -i "s/version '.*'/version '${CIRCLE_TAG:1}-android'/" build.gradle
                 sed -i "s/ext.web3jVersion = '.*'/ext.web3jVersion = '$web3j_version-android'/" build.gradle
-                sed -i "s/java.util.concurrent.CompletableFuture/java8.util.concurrent.CompletableFuture/" core/src/test/java/com/klaytn/caver/scenario/FastTransactionManagerIT.java
+                sed -i "s/java.util.concurrent.CompletableFuture/java8.util.concurrent.CompletableFuture/" core/src/test/java/com/klaytn/caver/legacy/scenario/FastTransactionManagerIT.java
               fi              
 
               version=v$(.circleci/version.sh)
               echo "Publishing a major android release! version=$version"
-              #./gradlew release --stacktrace --debug
-              echo "./gradlew release --stacktrace --debug"
-              #./gradlew bintrayUpload --stacktrace --debug
+              ./gradlew clean build --stacktrace --debug
+              ./gradlew clean publish --stacktrace --debug
+              ./gradlew closeAndReleaseRepository --stacktrace --debug
 
 workflows:
   version: 2

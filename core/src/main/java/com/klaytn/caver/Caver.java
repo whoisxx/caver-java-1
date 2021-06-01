@@ -16,9 +16,16 @@
 
 package com.klaytn.caver;
 
+import com.klaytn.caver.abi.wrapper.ABIWrapper;
+import com.klaytn.caver.account.wrapper.AccountWrapper;
+import com.klaytn.caver.contract.wrapper.ContractWrapper;
+import com.klaytn.caver.ipfs.wrapper.IPFSWrapper;
+import com.klaytn.caver.kct.wrapper.KCTWrapper;
 import com.klaytn.caver.rpc.RPC;
+import com.klaytn.caver.transaction.wrapper.TransactionWrapper;
+import com.klaytn.caver.utils.wrapper.UtilsWrapper;
+import com.klaytn.caver.wallet.IWallet;
 import com.klaytn.caver.wallet.KeyringContainer;
-import okhttp3.OkHttpClient;
 import org.web3j.protocol.Web3jService;
 import org.web3j.protocol.http.HttpService;
 
@@ -28,8 +35,6 @@ import org.web3j.protocol.http.HttpService;
 public class Caver {
 
     public static String DEFAULT_URL = "http://localhost:8551";
-    public static String MAINNET_URL = "https://api.cypress.klaytn.net:8651";
-    public static String BAOBAB_URL = "https://api.baobab.klaytn.net:8651";
 
     /**
      * @deprecated Please use <code>caver.rpc.klay</code> instead.
@@ -55,6 +60,45 @@ public class Caver {
      */
     public KeyringContainer wallet;
 
+    /**
+     * The Transaction instance.
+     */
+    public TransactionWrapper transaction;
+
+    /**
+     * The IPFSWrapper instance.
+     */
+    public IPFSWrapper ipfs;
+
+    /**
+     * The AccountWrapper instance
+     */
+    public AccountWrapper account;
+
+    /**
+     * The ContractWrapper instance.
+     */
+    public ContractWrapper contract;
+
+    /**
+     * The ABIWrapper instance
+     */
+    public ABIWrapper abi;
+
+    /**
+     * The KCTWrapper instance
+     */
+    public KCTWrapper kct;
+
+    /**
+     * The UtilsWrapper instance
+     */
+    public UtilsWrapper utils;
+
+    /**
+     * Creates a Caver instance<p>
+     * It sets a HttpProvider that using DEFAULT_URL("http://localhost:8551").
+     */
     public Caver() {
         this(new HttpService(DEFAULT_URL));
     }
@@ -72,8 +116,15 @@ public class Caver {
      * @param service Web3jService
      */
     public Caver(Web3jService service) {
+        ipfs = new IPFSWrapper();
         rpc = new RPC(service);
         wallet = new KeyringContainer();
+        account = new AccountWrapper();
+        transaction = new TransactionWrapper(rpc.getKlay());
+        contract = new ContractWrapper(this);
+        abi = new ABIWrapper();
+        kct = new KCTWrapper(this);
+        utils = new UtilsWrapper();
     }
 
     /**
@@ -110,10 +161,18 @@ public class Caver {
 
     /**
      * Getter for Wallet
-     * @return KeyringContainer
+     * @return IWallet
      */
-    public KeyringContainer getWallet() {
+    public IWallet getWallet() {
         return wallet;
+    }
+
+    /**
+     * Getter for IPFSWrapper
+     * @return IPFSWrapper
+     */
+    public IPFSWrapper getIpfs() {
+        return ipfs;
     }
 
     /**

@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 The caver-java Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the “License”);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an “AS IS” BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.klaytn.caver.transaction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -154,7 +170,7 @@ abstract public class AbstractFeeDelegatedTransaction extends AbstractTransactio
      * @throws IOException
      */
     public AbstractFeeDelegatedTransaction signAsFeePayer(AbstractKeyring keyring, Function<AbstractFeeDelegatedTransaction, String> hasher) throws IOException {
-        if(this.getFeePayer().equals("0x")) {
+        if(this.getFeePayer().equals("0x") || this.getFeePayer().equals(Utils.DEFAULT_ZERO_ADDRESS)) {
             this.setFeePayer(keyring.getAddress());
         }
 
@@ -182,7 +198,7 @@ abstract public class AbstractFeeDelegatedTransaction extends AbstractTransactio
      * @throws IOException
      */
     public AbstractFeeDelegatedTransaction signAsFeePayer(AbstractKeyring keyring, int index, Function<AbstractFeeDelegatedTransaction, String> hasher) throws IOException {
-        if(this.getFeePayer().equals("0x")) {
+        if(this.getFeePayer().equals("0x") || this.getFeePayer().equals(Utils.DEFAULT_ZERO_ADDRESS)) {
             this.setFeePayer(keyring.getAddress());
         }
 
@@ -241,8 +257,8 @@ abstract public class AbstractFeeDelegatedTransaction extends AbstractTransactio
             if(fillVariable) {
                 if(this.getNonce().equals("0x")) this.setNonce(txObj.getNonce());
                 if(this.getGasPrice().equals("0x")) this.setGasPrice(txObj.getGasPrice());
-                if(this.getFeePayer().equals("0x")) {
-                    if(!txObj.getFeePayer().equals("0x")) {
+                if(this.getFeePayer().equals("0x") || this.getFeePayer().equals(Utils.DEFAULT_ZERO_ADDRESS)) {
+                    if(!txObj.getFeePayer().equals("0x") && !txObj.getFeePayer().equals(Utils.DEFAULT_ZERO_ADDRESS)) {
                         this.setFeePayer(txObj.getFeePayer());
                         fillVariable = false;
                     }
@@ -319,11 +335,11 @@ abstract public class AbstractFeeDelegatedTransaction extends AbstractTransactio
      * @param feePayer The address of fee payer.
      */
     public void setFeePayer(String feePayer) {
-        if(feePayer == null) {
-            feePayer = "0x";
+        if(feePayer == null || feePayer.equals("0x")) {
+            feePayer = Utils.DEFAULT_ZERO_ADDRESS;
         }
 
-        if(!feePayer.equals("0x") && !Utils.isAddress(feePayer)) {
+        if(!Utils.isAddress(feePayer)) {
             throw new IllegalArgumentException("Invalid address. : " + feePayer);
         }
 
@@ -345,7 +361,7 @@ abstract public class AbstractFeeDelegatedTransaction extends AbstractTransactio
         }
 
         if(!Utils.isEmptySig(feePayerSignatures)) {
-            if (feePayer.equals("0x")) {
+            if (feePayer.equals("0x") || feePayer.equals(Utils.DEFAULT_ZERO_ADDRESS)) {
                 throw new IllegalArgumentException("feePayer is missing: feePayer must be defined with feePayerSignatures.");
             }
         }

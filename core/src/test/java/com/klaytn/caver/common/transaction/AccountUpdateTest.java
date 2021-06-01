@@ -4,17 +4,16 @@ import com.klaytn.caver.Caver;
 import com.klaytn.caver.account.Account;
 import com.klaytn.caver.account.WeightedMultiSigOptions;
 import com.klaytn.caver.transaction.TransactionHasher;
+import com.klaytn.caver.transaction.TxPropertyBuilder;
 import com.klaytn.caver.transaction.type.AccountUpdate;
+import com.klaytn.caver.transaction.type.TransactionType;
 import com.klaytn.caver.wallet.keyring.AbstractKeyring;
-import com.klaytn.caver.wallet.keyring.KeyringFactory;
 import com.klaytn.caver.wallet.keyring.PrivateKey;
 import com.klaytn.caver.wallet.keyring.SignatureData;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
 import org.web3j.utils.Numeric;
 
 import java.io.IOException;
@@ -24,32 +23,18 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-        AccountUpdateTest.createInstance.class,
-        AccountUpdateTest.createInstanceBuilder.class,
-        AccountUpdateTest.getRLPEncodingTest.class,
-        AccountUpdateTest.signWithKeyTest.class,
-        AccountUpdateTest.signWithKeysTest.class,
-        AccountUpdateTest.appendSignaturesTest.class,
-        AccountUpdateTest.combineSignatureTest.class,
-        AccountUpdateTest.getRawTransactionTest.class,
-        AccountUpdateTest.getTransactionHashTest.class,
-        AccountUpdateTest.getSenderTxHashTest.class,
-        AccountUpdateTest.getRLPEncodingForSignatureTest.class,
-})
 public class AccountUpdateTest {
+    static Caver caver = new Caver(Caver.DEFAULT_URL);
 
     public static AbstractKeyring generateRoleBaseKeyring(int[] numArr, String address) {
         String[][] keyArr = new String[3][];
 
-        for(int i=0; i<numArr.length; i++) {
+        for(int i = 0; i < numArr.length; i++) {
             int length = numArr[i];
             String[] arr = new String[length];
-            for(int j=0; j<length; j++) {
+            for(int j = 0; j < length; j++) {
                 arr[j] = PrivateKey.generate("entropy").getPrivateKey();
             }
             keyArr[i] = arr;
@@ -57,7 +42,7 @@ public class AccountUpdateTest {
 
         List<String[]> arr = Arrays.asList(keyArr);
 
-        return KeyringFactory.createWithRoleBasedKey(address, arr);
+        return caver.wallet.keyring.createWithRoleBasedKey(address, arr);
     }
 
     public static List<AccountUpdate> getAccountUpdateList() {
@@ -175,13 +160,13 @@ public class AccountUpdateTest {
                 Numeric.hexStringToByteArray("0x20502f22a1b3c95a5f260a03dc3de0eaa1f4a618b1d2a7d4da643507302e523c")
         );
 
-        String[] pubKeyArr = new  String[] {
+        String[] pubKeyArr = new String[]{
                 "0xe1c4bb4d01245ebdc62a88092f6c79b59d56e319ae694050e7a0c1cff93a0d9240bf159aa0ee59bacb41df2185cf0be1ca316c349d839e4edc04e1af77ec8c4e",
                 "0x13853532348457b4fb18526c6447a6cdff38a791dc2e778f19a843fc6b3a3e8d4cb21a4c331ccc967aa9127fb7e49ce52eaf69c967521d4066745371868b297b",
                 "0xe0f3c6f28dc933ac3cf7fc3143f0d38bc83aa9541ce7bb67c356cad5c9b020a3a0b24f48b17b1f7880ba027ad39095ae53888d788816658e47a58193c1b81720"
         };
 
-        BigInteger[] weight = new BigInteger[] {BigInteger.ONE, BigInteger.ONE, BigInteger.ONE};
+        BigInteger[] weight = new BigInteger[]{BigInteger.ONE, BigInteger.ONE, BigInteger.ONE};
         WeightedMultiSigOptions weightedMultiSigOptions = new WeightedMultiSigOptions(BigInteger.valueOf(2), Arrays.asList(weight));
         Account account = Account.createWithAccountKeyWeightedMultiSig(address, pubKeyArr, weightedMultiSigOptions);
 
@@ -209,25 +194,25 @@ public class AccountUpdateTest {
                 Numeric.hexStringToByteArray("0x761e12fe11003aa4cb8fd9b44a41e5edebeb943cc366264b345d0f7e63853724")
         );
 
-        String[][] pubKeyArr = new String[][] {
+        String[][] pubKeyArr = new String[][]{
                 {
-                    "0xf7e7e03c328d39cee6201080ac2576919f904f0b8e47fcb7ea8869e7db0baf4470a0b29a1f6dd007e19a53da122d18bf6273cdddb2903ef0ad2b350b207ad67c",
-                    "0xedacd9095274f292c702514f6443f58337e7d7c8311694f31c73e86f150ecf45820929c143da861f6009784e36a6ebd99f83b1baf93fd72e820b5df3cd00883b",
-                    "0xb74fd682a6a805415e7711890bc91a283c268c78947ebf25a02a2e02625a68aa825b5213f3e9f03c34650da902a2a70915dcc1c7fe86333a7e40e638361335a4"
+                        "0xf7e7e03c328d39cee6201080ac2576919f904f0b8e47fcb7ea8869e7db0baf4470a0b29a1f6dd007e19a53da122d18bf6273cdddb2903ef0ad2b350b207ad67c",
+                        "0xedacd9095274f292c702514f6443f58337e7d7c8311694f31c73e86f150ecf45820929c143da861f6009784e36a6ebd99f83b1baf93fd72e820b5df3cd00883b",
+                        "0xb74fd682a6a805415e7711890bc91a283c268c78947ebf25a02a2e02625a68aa825b5213f3e9f03c34650da902a2a70915dcc1c7fe86333a7e40e638361335a4"
                 },
                 {
-                    "0xd0ae803893f344ee664378bbc9ebb35ca2d94f7d7ecea4e3e2f9f33817cdb04bb54cf4211eef21e9627a7d0ca6960e8f1135a35c751f526ce203c6e36b3f2230",
+                        "0xd0ae803893f344ee664378bbc9ebb35ca2d94f7d7ecea4e3e2f9f33817cdb04bb54cf4211eef21e9627a7d0ca6960e8f1135a35c751f526ce203c6e36b3f2230",
                 },
                 {
-                    "0x4b4cd35195aa4324184a64821e514a991b513cc354f5fa6d78fb99e23949bc59613d8be87ad3e1418ad11e1d5537233b697bc0c8c5d7335a6decf687cce700ba",
-                    "0x3e65f4a76bca1488a1a046d6976778852aa41f07156d2c42e81c3da6621435d2350f8419fe8255dc87158c8ae30378b19b0d3d224eb410ca2de847a41caeb617"
+                        "0x4b4cd35195aa4324184a64821e514a991b513cc354f5fa6d78fb99e23949bc59613d8be87ad3e1418ad11e1d5537233b697bc0c8c5d7335a6decf687cce700ba",
+                        "0x3e65f4a76bca1488a1a046d6976778852aa41f07156d2c42e81c3da6621435d2350f8419fe8255dc87158c8ae30378b19b0d3d224eb410ca2de847a41caeb617"
                 }
         };
 
-        WeightedMultiSigOptions[] options = new WeightedMultiSigOptions[] {
-            new WeightedMultiSigOptions(BigInteger.valueOf(2), Arrays.asList(BigInteger.ONE, BigInteger.ONE, BigInteger.ONE)),
-            new WeightedMultiSigOptions(),
-            new WeightedMultiSigOptions(BigInteger.ONE, Arrays.asList(BigInteger.ONE, BigInteger.ONE))
+        WeightedMultiSigOptions[] options = new WeightedMultiSigOptions[]{
+                new WeightedMultiSigOptions(BigInteger.valueOf(2), Arrays.asList(BigInteger.ONE, BigInteger.ONE, BigInteger.ONE)),
+                new WeightedMultiSigOptions(),
+                new WeightedMultiSigOptions(BigInteger.ONE, Arrays.asList(BigInteger.ONE, BigInteger.ONE))
         };
 
         Account account = Account.createWithAccountKeyRoleBased(address, Arrays.asList(pubKeyArr), Arrays.asList(options));
@@ -331,6 +316,7 @@ public class AccountUpdateTest {
                     .build();
 
             assertNotNull(txObj);
+            assertEquals(TransactionType.TxTypeAccountUpdate.toString(), txObj.getType());
         }
 
         @Test
@@ -346,7 +332,8 @@ public class AccountUpdateTest {
 
             assertFalse(txObj.getNonce().isEmpty());
             assertFalse(txObj.getGasPrice().isEmpty());
-            assertFalse(txObj.getChainId().isEmpty());        }
+            assertFalse(txObj.getChainId().isEmpty());
+        }
 
         @Test
         public void BuilderTestWithBigInteger() {
@@ -365,6 +352,7 @@ public class AccountUpdateTest {
             assertEquals(gas, txObj.getGas());
             assertEquals(gasPrice, txObj.getGasPrice());
             assertEquals(chainID, txObj.getChainId());
+            assertEquals(TransactionType.TxTypeAccountUpdate.toString(), txObj.getType());
         }
 
         @Test
@@ -467,18 +455,18 @@ public class AccountUpdateTest {
 
         @Test
         public void createInstance() {
-            AccountUpdate txObj = new AccountUpdate(
-                    null,
-                    from,
-                    nonce,
-                    gas,
-                    gasPrice,
-                    chainID,
-                    null,
-                    account
+            AccountUpdate txObj = caver.transaction.accountUpdate.create(
+                    TxPropertyBuilder.accountUpdate()
+                            .setNonce(nonce)
+                            .setGas(gas)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setFrom(from)
+                            .setAccount(account)
             );
 
             assertNotNull(txObj);
+            assertEquals(TransactionType.TxTypeAccountUpdate.toString(), txObj.getType());
         }
 
         @Test
@@ -488,15 +476,14 @@ public class AccountUpdateTest {
 
             String from = "invalid Address";
 
-            AccountUpdate txObj = new AccountUpdate(
-                    null,
-                    from,
-                    nonce,
-                    gas,
-                    gasPrice,
-                    chainID,
-                    null,
-                    account
+            AccountUpdate txObj = caver.transaction.accountUpdate.create(
+                    TxPropertyBuilder.accountUpdate()
+                            .setNonce(nonce)
+                            .setGas(gas)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setFrom(from)
+                            .setAccount(account)
             );
         }
 
@@ -507,15 +494,14 @@ public class AccountUpdateTest {
 
             String from = null;
 
-            AccountUpdate txObj = new AccountUpdate(
-                    null,
-                    from,
-                    nonce,
-                    gas,
-                    gasPrice,
-                    chainID,
-                    null,
-                    account
+            AccountUpdate txObj = caver.transaction.accountUpdate.create(
+                    TxPropertyBuilder.accountUpdate()
+                            .setNonce(nonce)
+                            .setGas(gas)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setFrom(from)
+                            .setAccount(account)
             );
         }
 
@@ -526,15 +512,14 @@ public class AccountUpdateTest {
 
             String gas = "invalid gas";
 
-            AccountUpdate txObj = new AccountUpdate(
-                    null,
-                    from,
-                    nonce,
-                    gas,
-                    gasPrice,
-                    chainID,
-                    null,
-                    account
+            AccountUpdate txObj = caver.transaction.accountUpdate.create(
+                    TxPropertyBuilder.accountUpdate()
+                            .setNonce(nonce)
+                            .setGas(gas)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setFrom(from)
+                            .setAccount(account)
             );
         }
 
@@ -545,15 +530,14 @@ public class AccountUpdateTest {
 
             String gas = null;
 
-            AccountUpdate txObj = new AccountUpdate(
-                    null,
-                    from,
-                    nonce,
-                    gas,
-                    gasPrice,
-                    chainID,
-                    null,
-                    account
+            AccountUpdate txObj = caver.transaction.accountUpdate.create(
+                    TxPropertyBuilder.accountUpdate()
+                            .setNonce(nonce)
+                            .setGas(gas)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setFrom(from)
+                            .setAccount(account)
             );
         }
     }
@@ -567,7 +551,7 @@ public class AccountUpdateTest {
             List<AccountUpdate> updateList = getAccountUpdateList();
             List<ExpectedData> expectedDataList = getExpectedDataList();
 
-            for(int i=0; i< updateList.size(); i++) {
+            for(int i = 0; i < updateList.size(); i++) {
                 assertEquals(expectedDataList.get(i).expectedRLP, updateList.get(i).getRLPEncoding());
             }
 
@@ -586,13 +570,14 @@ public class AccountUpdateTest {
 
             Account account = Account.createWithAccountKeyLegacy(from);
 
-            AccountUpdate txObj = new AccountUpdate.Builder()
-                    .setGas(gas)
-                    .setGasPrice(gasPrice)
-                    .setChainId(chainID)
-                    .setFrom(from)
-                    .setAccount(account)
-                    .build();
+            AccountUpdate txObj = caver.transaction.accountUpdate.create(
+                    TxPropertyBuilder.accountUpdate()
+                            .setGas(gas)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setFrom(from)
+                            .setAccount(account)
+            );
 
             txObj.getRLPEncoding();
         }
@@ -610,13 +595,14 @@ public class AccountUpdateTest {
 
             Account account = Account.createWithAccountKeyLegacy(from);
 
-            AccountUpdate txObj = new AccountUpdate.Builder()
-                    .setNonce(nonce)
-                    .setGas(gas)
-                    .setChainId(chainID)
-                    .setFrom(from)
-                    .setAccount(account)
-                    .build();
+            AccountUpdate txObj = caver.transaction.accountUpdate.create(
+                    TxPropertyBuilder.accountUpdate()
+                            .setNonce(nonce)
+                            .setGas(gas)
+                            .setChainId(chainID)
+                            .setFrom(from)
+                            .setAccount(account)
+            );
 
             txObj.getRLPEncoding();
         }
@@ -641,27 +627,27 @@ public class AccountUpdateTest {
         String klaytnWalletKey;
 
 
-
         @Before
         public void before() {
             Account account = Account.createWithAccountKeyPublic(from, new PrivateKey(privateKey).getPublicKey(false));
 
-            mTxObj = new AccountUpdate.Builder()
-                    .setFrom(from)
-                    .setGas(gas)
-                    .setNonce(nonce)
-                    .setGasPrice(gasPrice)
-                    .setChainId(chainID)
-                    .setAccount(account)
-                    .build();
+            mTxObj = caver.transaction.accountUpdate.create(
+                    TxPropertyBuilder.accountUpdate()
+                            .setFrom(from)
+                            .setGas(gas)
+                            .setNonce(nonce)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setAccount(account)
+            );
 
-            coupledKeyring = KeyringFactory.createFromPrivateKey(privateKey);
-            deCoupledKeyring = KeyringFactory.createWithSingleKey(PrivateKey.generate().getDerivedAddress(), privateKey);
+            coupledKeyring = caver.wallet.keyring.createFromPrivateKey(privateKey);
+            deCoupledKeyring = caver.wallet.keyring.createWithSingleKey(caver.wallet.keyring.generate().getAddress(), privateKey);
             klaytnWalletKey = privateKey + "0x00" + coupledKeyring.getAddress();
         }
 
         @Test
-        public void signWithKey_Keyring() throws IOException{
+        public void signWithKey_Keyring() throws IOException {
             mTxObj.sign(coupledKeyring, 0, TransactionHasher::getHashForSignature);
             assertEquals(expectedRLPEncoding, mTxObj.getRawTransaction());
         }
@@ -715,7 +701,7 @@ public class AccountUpdateTest {
             expectedException.expect(IllegalArgumentException.class);
             expectedException.expectMessage("Invalid index : index must be less than the length of the key.");
 
-            AbstractKeyring role = generateRoleBaseKeyring(new int[]{3,3,3}, from);
+            AbstractKeyring role = generateRoleBaseKeyring(new int[]{3, 3, 3}, from);
             mTxObj.sign(role, 4);
         }
     }
@@ -739,22 +725,22 @@ public class AccountUpdateTest {
         String klaytnWalletKey;
 
 
-
         @Before
         public void before() {
             Account account = Account.createWithAccountKeyPublic(from, new PrivateKey(privateKey).getPublicKey(false));
 
-            mTxObj = new AccountUpdate.Builder()
-                    .setFrom(from)
-                    .setGas(gas)
-                    .setNonce(nonce)
-                    .setGasPrice(gasPrice)
-                    .setChainId(chainID)
-                    .setAccount(account)
-                    .build();
+            mTxObj = caver.transaction.accountUpdate.create(
+                    TxPropertyBuilder.accountUpdate()
+                            .setFrom(from)
+                            .setGas(gas)
+                            .setNonce(nonce)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setAccount(account)
+            );
 
-            coupledKeyring = KeyringFactory.createFromPrivateKey(privateKey);
-            deCoupledKeyring = KeyringFactory.createWithSingleKey(PrivateKey.generate().getDerivedAddress(), privateKey);
+            coupledKeyring = caver.wallet.keyring.createFromPrivateKey(privateKey);
+            deCoupledKeyring = caver.wallet.keyring.createWithSingleKey(caver.wallet.keyring.generate().getAddress(), privateKey);
             klaytnWalletKey = privateKey + "0x00" + coupledKeyring.getAddress();
         }
 
@@ -796,7 +782,7 @@ public class AccountUpdateTest {
 
         @Test
         public void signWithKeys_roleBasedKeyring() throws IOException {
-            AbstractKeyring roleBased = generateRoleBaseKeyring(new int[]{3,3,3}, from);
+            AbstractKeyring roleBased = generateRoleBaseKeyring(new int[]{3, 3, 3}, from);
 
             mTxObj.sign(roleBased);
             assertEquals(3, mTxObj.getSignatures().size());
@@ -821,14 +807,15 @@ public class AccountUpdateTest {
 
         @Before
         public void before() {
-            mTxObj = new AccountUpdate.Builder()
-                    .setFrom(from)
-                    .setGas(gas)
-                    .setNonce(nonce)
-                    .setGasPrice(gasPrice)
-                    .setChainId(chainID)
-                    .setAccount(account)
-                    .build();
+            mTxObj = caver.transaction.accountUpdate.create(
+                    TxPropertyBuilder.accountUpdate()
+                            .setFrom(from)
+                            .setGas(gas)
+                            .setNonce(nonce)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setAccount(account)
+            );
         }
 
 
@@ -863,15 +850,16 @@ public class AccountUpdateTest {
         public void appendSignatureList_EmptySig() {
             SignatureData emptySignature = SignatureData.getEmptySignature();
 
-            mTxObj = new AccountUpdate.Builder()
-                    .setFrom(from)
-                    .setGas(gas)
-                    .setNonce(nonce)
-                    .setGasPrice(gasPrice)
-                    .setChainId(chainID)
-                    .setAccount(account)
-                    .setSignatures(emptySignature)
-                    .build();
+            mTxObj = caver.transaction.accountUpdate.create(
+                    TxPropertyBuilder.accountUpdate()
+                            .setFrom(from)
+                            .setGas(gas)
+                            .setNonce(nonce)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setAccount(account)
+                            .setSignatures(emptySignature)
+            );
 
             SignatureData signatureData = new SignatureData(
                     Numeric.hexStringToByteArray("0x0fea"),
@@ -894,15 +882,16 @@ public class AccountUpdateTest {
                     Numeric.hexStringToByteArray("0x38160105d78cef4529d765941ad6637d8dcf6bd99310e165fee1c39fff2aa27e")
             );
 
-            mTxObj = new AccountUpdate.Builder()
-                    .setFrom(from)
-                    .setGas(gas)
-                    .setNonce(nonce)
-                    .setGasPrice(gasPrice)
-                    .setChainId(chainID)
-                    .setAccount(account)
-                    .setSignatures(signatureData)
-                    .build();
+            mTxObj = caver.transaction.accountUpdate.create(
+                    TxPropertyBuilder.accountUpdate()
+                            .setFrom(from)
+                            .setGas(gas)
+                            .setNonce(nonce)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setAccount(account)
+                            .setSignatures(signatureData)
+            );
 
             SignatureData signatureData1 = new SignatureData(
                     Numeric.hexStringToByteArray("0x0fea"),
@@ -927,15 +916,16 @@ public class AccountUpdateTest {
                     Numeric.hexStringToByteArray("0x38160105d78cef4529d765941ad6637d8dcf6bd99310e165fee1c39fff2aa27e")
             );
 
-            mTxObj = new AccountUpdate.Builder()
-                    .setFrom(from)
-                    .setGas(gas)
-                    .setNonce(nonce)
-                    .setGasPrice(gasPrice)
-                    .setChainId(chainID)
-                    .setAccount(account)
-                    .setSignatures(signatureData)
-                    .build();
+            mTxObj = caver.transaction.accountUpdate.create(
+                    TxPropertyBuilder.accountUpdate()
+                            .setFrom(from)
+                            .setGas(gas)
+                            .setNonce(nonce)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setAccount(account)
+                            .setSignatures(signatureData)
+            );
 
             SignatureData signatureData1 = new SignatureData(
                     Numeric.hexStringToByteArray("0x0fea"),
@@ -978,14 +968,15 @@ public class AccountUpdateTest {
         public void before() {
 
 
-            mTxObj = new AccountUpdate.Builder()
-                    .setFrom(from)
-                    .setGas(gas)
-                    .setNonce(nonce)
-                    .setGasPrice(gasPrice)
-                    .setChainId(chainID)
-                    .setAccount(account)
-                    .build();
+            mTxObj = caver.transaction.accountUpdate.create(
+                    TxPropertyBuilder.accountUpdate()
+                            .setFrom(from)
+                            .setGas(gas)
+                            .setNonce(nonce)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setAccount(account)
+            );
         }
 
         @Test
@@ -1014,19 +1005,20 @@ public class AccountUpdateTest {
             );
 
 
-            mTxObj = new AccountUpdate.Builder()
-                    .setFrom(from)
-                    .setGas(gas)
-                    .setNonce(nonce)
-                    .setGasPrice(gasPrice)
-                    .setChainId(chainID)
-                    .setAccount(account)
-                    .setSignatures(signatureData)
-                    .build();
+            mTxObj = caver.transaction.accountUpdate.create(
+                    TxPropertyBuilder.accountUpdate()
+                            .setFrom(from)
+                            .setGas(gas)
+                            .setNonce(nonce)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setAccount(account)
+                            .setSignatures(signatureData)
+            );
 
             String expectedRLPEncoded = "0x20f8fa018505d21dba0083015f909440efcb7d744fdc881f698a8ec573999fe63835458201c0f8d5f845820fe9a0f2a83743da6931ce25a29d04f1c51cec8464f0d9d4dabb5acb059aa3fb8c345aa065879e06474669005e02e0b8ca06cba6f8943022305659f8936f1f6109147fddf845820feaa0638f0d712b4b709cadab174dea6da50e5429ea59d78446e810af954af8d67981a0129ad4eb9222e161e9e52be9c2384e1b1ff7566c640bc5b30c054efd64b081e7f845820fe9a0935584330d98f4a8a1cf83bf81ea7a18e33a962ad17b6a9eb8e04e3f5f95179da026804e07b5c105427497e8336300c1435d30ffa8d379dc27e5c1facd966c58db";
 
-            SignatureData[] expectedSignature = new SignatureData[] {
+            SignatureData[] expectedSignature = new SignatureData[]{
                     new SignatureData(
                             Numeric.hexStringToByteArray("0x0fe9"),
                             Numeric.hexStringToByteArray("0xf2a83743da6931ce25a29d04f1c51cec8464f0d9d4dabb5acb059aa3fb8c345a"),
@@ -1044,7 +1036,7 @@ public class AccountUpdateTest {
                     )
             };
 
-            String[] rlpEncodedString = new String[] {
+            String[] rlpEncodedString = new String[]{
                     "0x20f86c018505d21dba0083015f909440efcb7d744fdc881f698a8ec573999fe63835458201c0f847f845820feaa0638f0d712b4b709cadab174dea6da50e5429ea59d78446e810af954af8d67981a0129ad4eb9222e161e9e52be9c2384e1b1ff7566c640bc5b30c054efd64b081e7",
                     "0x20f86c018505d21dba0083015f909440efcb7d744fdc881f698a8ec573999fe63835458201c0f847f845820fe9a0935584330d98f4a8a1cf83bf81ea7a18e33a962ad17b6a9eb8e04e3f5f95179da026804e07b5c105427497e8336300c1435d30ffa8d379dc27e5c1facd966c58db"
             };
@@ -1069,14 +1061,15 @@ public class AccountUpdateTest {
 
             String nonce = "0x1000";
 
-            mTxObj = new AccountUpdate.Builder()
-                    .setFrom(from)
-                    .setGas(gas)
-                    .setNonce(nonce)
-                    .setGasPrice(gasPrice)
-                    .setChainId(chainID)
-                    .setAccount(account)
-                    .build();
+            mTxObj = caver.transaction.accountUpdate.create(
+                    TxPropertyBuilder.accountUpdate()
+                            .setFrom(from)
+                            .setGas(gas)
+                            .setNonce(nonce)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setAccount(account)
+            );
 
             String rlpEncoded = "0x20f86c018505d21dba0083015f909440efcb7d744fdc881f698a8ec573999fe63835458201c0f847f845820feaa0638f0d712b4b709cadab174dea6da50e5429ea59d78446e810af954af8d67981a0129ad4eb9222e161e9e52be9c2384e1b1ff7566c640bc5b30c054efd64b081e7";
             List<String> list = new ArrayList<>();
@@ -1093,7 +1086,7 @@ public class AccountUpdateTest {
             List<AccountUpdate> updateList = getAccountUpdateList();
             List<ExpectedData> expectedDataList = getExpectedDataList();
 
-            for(int i=0; i< updateList.size(); i++) {
+            for(int i = 0; i < updateList.size(); i++) {
                 assertEquals(expectedDataList.get(i).expectedRLP, updateList.get(i).getRawTransaction());
             }
 //            String rawTx = mTxObj.getRawTransaction();
@@ -1119,7 +1112,7 @@ public class AccountUpdateTest {
             List<AccountUpdate> updateList = getAccountUpdateList();
             List<ExpectedData> expectedDataList = getExpectedDataList();
 
-            for(int i=0; i< updateList.size(); i++) {
+            for(int i = 0; i < updateList.size(); i++) {
                 assertEquals(expectedDataList.get(i).expectedTxHash, updateList.get(i).getTransactionHash());
             }
         }
@@ -1129,29 +1122,31 @@ public class AccountUpdateTest {
             expectedException.expect(RuntimeException.class);
             expectedException.expectMessage("nonce is undefined. Define nonce in transaction or use 'transaction.fillTransaction' to fill values.");
 
-            mTxObj = new AccountUpdate.Builder()
-                    .setFrom(from)
-                    .setGas(gas)
-                    .setGasPrice(gasPrice)
-                    .setChainId(chainID)
-                    .setAccount(account)
-                    .build();
+            mTxObj = caver.transaction.accountUpdate.create(
+                    TxPropertyBuilder.accountUpdate()
+                            .setFrom(from)
+                            .setGas(gas)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setAccount(account)
+            );
 
             mTxObj.getTransactionHash();
         }
 
         @Test
-        public void throwException_NotDefined_gasPrice() {
+        public void throwException_NotDefined_GasPrice() {
             expectedException.expect(RuntimeException.class);
             expectedException.expectMessage("gasPrice is undefined. Define gasPrice in transaction or use 'transaction.fillTransaction' to fill values.");
 
-            mTxObj = new AccountUpdate.Builder()
-                    .setFrom(from)
-                    .setGas(gas)
-                    .setNonce(nonce)
-                    .setChainId(chainID)
-                    .setAccount(account)
-                    .build();
+            mTxObj = caver.transaction.accountUpdate.create(
+                    TxPropertyBuilder.accountUpdate()
+                            .setFrom(from)
+                            .setGas(gas)
+                            .setNonce(nonce)
+                            .setChainId(chainID)
+                            .setAccount(account)
+            );
 
             mTxObj.getTransactionHash();
         }
@@ -1176,7 +1171,7 @@ public class AccountUpdateTest {
             List<AccountUpdate> updateList = getAccountUpdateList();
             List<ExpectedData> expectedDataList = getExpectedDataList();
 
-            for(int i=0; i< updateList.size(); i++) {
+            for(int i = 0; i < updateList.size(); i++) {
                 assertEquals(expectedDataList.get(i).expectedTxHash, updateList.get(i).getSenderTxHash());
             }
         }
@@ -1186,29 +1181,31 @@ public class AccountUpdateTest {
             expectedException.expect(RuntimeException.class);
             expectedException.expectMessage("nonce is undefined. Define nonce in transaction or use 'transaction.fillTransaction' to fill values.");
 
-            mTxObj = new AccountUpdate.Builder()
-                    .setFrom(from)
-                    .setGas(gas)
-                    .setGasPrice(gasPrice)
-                    .setChainId(chainID)
-                    .setAccount(account)
-                    .build();
+            mTxObj = caver.transaction.accountUpdate.create(
+                    TxPropertyBuilder.accountUpdate()
+                            .setFrom(from)
+                            .setGas(gas)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setAccount(account)
+            );
 
             mTxObj.getSenderTxHash();
         }
 
         @Test
-        public void throwException_NotDefined_gasPrice() {
+        public void throwException_NotDefined_GasPrice() {
             expectedException.expect(RuntimeException.class);
             expectedException.expectMessage("gasPrice is undefined. Define gasPrice in transaction or use 'transaction.fillTransaction' to fill values.");
 
-            mTxObj = new AccountUpdate.Builder()
-                    .setFrom(from)
-                    .setGas(gas)
-                    .setNonce(nonce)
-                    .setChainId(chainID)
-                    .setAccount(account)
-                    .build();
+            mTxObj = caver.transaction.accountUpdate.create(
+                    TxPropertyBuilder.accountUpdate()
+                            .setFrom(from)
+                            .setGas(gas)
+                            .setNonce(nonce)
+                            .setChainId(chainID)
+                            .setAccount(account)
+            );
 
             mTxObj.getSenderTxHash();
         }
@@ -1233,7 +1230,7 @@ public class AccountUpdateTest {
             List<AccountUpdate> updateList = getAccountUpdateList();
             List<ExpectedData> expectedDataList = getExpectedDataList();
 
-            for(int i=0; i< updateList.size(); i++) {
+            for(int i = 0; i < updateList.size(); i++) {
                 assertEquals(expectedDataList.get(i).expectedRlpEncodingForSigning, updateList.get(i).getCommonRLPEncodingForSignature());
             }
         }
@@ -1243,45 +1240,48 @@ public class AccountUpdateTest {
             expectedException.expect(RuntimeException.class);
             expectedException.expectMessage("nonce is undefined. Define nonce in transaction or use 'transaction.fillTransaction' to fill values.");
 
-            mTxObj = new AccountUpdate.Builder()
-                    .setFrom(from)
-                    .setGas(gas)
-                    .setGasPrice(gasPrice)
-                    .setChainId(chainID)
-                    .setAccount(account)
-                    .build();
+            mTxObj = caver.transaction.accountUpdate.create(
+                    TxPropertyBuilder.accountUpdate()
+                            .setFrom(from)
+                            .setGas(gas)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setAccount(account)
+            );
 
             mTxObj.getRLPEncodingForSignature();
         }
 
         @Test
-        public void throwException_NotDefined_gasPrice() {
+        public void throwException_NotDefined_GasPrice() {
             expectedException.expect(RuntimeException.class);
             expectedException.expectMessage("gasPrice is undefined. Define gasPrice in transaction or use 'transaction.fillTransaction' to fill values.");
 
-            mTxObj = new AccountUpdate.Builder()
-                    .setFrom(from)
-                    .setGas(gas)
-                    .setNonce(nonce)
-                    .setChainId(chainID)
-                    .setAccount(account)
-                    .build();
+            mTxObj = caver.transaction.accountUpdate.create(
+                    TxPropertyBuilder.accountUpdate()
+                            .setFrom(from)
+                            .setGas(gas)
+                            .setNonce(nonce)
+                            .setChainId(chainID)
+                            .setAccount(account)
+            );
 
             mTxObj.getRLPEncodingForSignature();
         }
 
         @Test
-        public void throwException_NotDefined_chainID() {
+        public void throwException_NotDefined_ChainID() {
             expectedException.expect(RuntimeException.class);
             expectedException.expectMessage("chainId is undefined. Define chainId in transaction or use 'transaction.fillTransaction' to fill values.");
 
-            mTxObj = new AccountUpdate.Builder()
-                    .setFrom(from)
-                    .setNonce(nonce)
-                    .setGas(gas)
-                    .setGasPrice(gasPrice)
-                    .setAccount(account)
-                    .build();
+            mTxObj = caver.transaction.accountUpdate.create(
+                    TxPropertyBuilder.accountUpdate()
+                            .setFrom(from)
+                            .setNonce(nonce)
+                            .setGas(gas)
+                            .setGasPrice(gasPrice)
+                            .setAccount(account)
+            );
 
             mTxObj.getRLPEncodingForSignature();
         }

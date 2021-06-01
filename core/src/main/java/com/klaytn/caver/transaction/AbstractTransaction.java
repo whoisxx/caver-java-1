@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 The caver-java Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the “License”);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an “AS IS” BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.klaytn.caver.transaction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -255,7 +271,7 @@ abstract public class AbstractTransaction {
             throw new IllegalArgumentException("A legacy transaction cannot be signed with a decoupled keyring.");
         }
 
-        if(this.from.equals("0x")){
+        if(this.from.equals("0x") || this.from.equals(Utils.DEFAULT_ZERO_ADDRESS)){
             this.from = keyring.getAddress();
         }
 
@@ -299,7 +315,7 @@ abstract public class AbstractTransaction {
             throw new IllegalArgumentException("A legacy transaction cannot be signed with a decoupled keyring.");
         }
 
-        if(this.from.equals("0x")){
+        if(this.from.equals("0x") || this.from.equals(Utils.DEFAULT_ZERO_ADDRESS)){
             this.from = keyring.getAddress();
         }
 
@@ -437,7 +453,7 @@ abstract public class AbstractTransaction {
         }
 
         if(this.nonce.equals("0x") || this.chainId.equals("0x") || this.gasPrice.equals("0x")) {
-            throw new RuntimeException("Cannot fill transaction data.(nonce, chainId, gasPrice");
+            throw new RuntimeException("Cannot fill transaction data.(nonce, chainId, gasPrice). `klaytnCall` must be set in Transaction instance to automatically fill the nonce, chainId or gasPrice. Please call the `setKlaytnCall` to set `klaytnCall` in the Transaction instance.");
         }
     }
 
@@ -605,7 +621,7 @@ abstract public class AbstractTransaction {
     public void setFrom(String from) {
         //"From" field in LegacyTransaction allows null
         if(this instanceof LegacyTransaction) {
-            if(from == null || from.isEmpty() || from.equals("0x")) from = "0x";
+            if(from == null || from.isEmpty() || from.equals("0x") || from.equals(Utils.DEFAULT_ZERO_ADDRESS)) from = Utils.DEFAULT_ZERO_ADDRESS;
         } else {
             if(from == null) {
                 throw new IllegalArgumentException("from is missing.");
@@ -630,7 +646,7 @@ abstract public class AbstractTransaction {
         }
 
         if(!Utils.isNumber(gas)) {
-            throw new IllegalArgumentException("Invalid gas. : "  + gas);
+            throw new IllegalArgumentException("Invalid gas. : " + gas);
         }
         this.gas = gas;
     }

@@ -12,27 +12,58 @@ This library is an interface which allows Java applications to easily communicat
 - Creation of a new wallet and managing Klaytn wallets
 - Command line tools
 - Android compatible
+
 ## Getting started
-#### maven
+
+### Installation
+
+#### add a Repository
+
+To install caver-java, you should add a jitpack repository for IPFS feature.
+
+**maven**
+```groovy
+<repositories>
+    <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+    </repository>
+</repositories>
+```
+
+**gradle**
+```groovy
+allprojects {
+    repositories {
+        ...
+        maven { url 'https://jitpack.io' }
+    }
+}
+```
+#### add a dependency
+
+**maven**
 ```groovy
 <dependency>
-  <groupId>com.klaytn.caver</groupId>
-  <artifactId>core</artifactId>
-  <version>1.5.3</version>
+    <groupId>com.klaytn.caver</groupId>
+    <artifactId>core</artifactId>
+    <version>X.X.X</version>
 </dependency>
 ```
-#### gradle
+
+**gradle**
 ```groovy
-compile 'com.klaytn.caver:core:1.5.3'
+compile 'com.klaytn.caver:core:X.X.X'
 ```
-If you want to use Android dependency, just append -android at the end of version. (e.g. 1.5.3-android)
+If you want to use Android dependency, just append -android at the end of version. (e.g. 1.5.4-android)
+
+You can find latest caver-java version at [release page](https://github.com/klaytn/caver-java/releases).
 
 ## Start a Client
 If you want to run your own EN (Endpoint Node), see [EN Operation Guide](https://docs.klaytn.com/node/en) to set up.
-Otherwise, you can use a Klaytn public EN (https://api.cypress.klaytn.net:8651/) to connect to the mainnet and another public EN (https://api.baobab.klaytn.net:8651) to connect to the Baobab testnet.
 
 ```java
-Caver caver = new Caver(Caver.BAOBAB_URL);
+Caver caver = new Caver(Caver.DEFAULT_URL);
 ```
 
 ## Transactions
@@ -40,7 +71,7 @@ When you send transactions, `caver-java` provides easy-to-use wrapper classes.
 
 Here's an example of transferring KLAY using keystore.json and `ValueTransfer` class:
 ```java
-Caver caver = new Caver(Caver.BAOBAB_URL);
+Caver caver = new Caver(Caver.DEFAULT_URL);
 
 //Read keystore json file.
 File file = new File("./keystore.json");
@@ -98,7 +129,7 @@ Klaytn provides [Fee Delegation](https://docs.klaytn.com/klaytn/design/transacti
 When you are a sender:
 
 ```java
-Caver caver = new Caver(Caver.BAOBAB_URL);
+Caver caver = new Caver(Caver.DEFAULT_URL);
 SingleKeyring senderKeyring = KeyringFactory.createFromPrivateKey("0x{privateKey}");
 caver.wallet.add(senderKeyring);
 
@@ -120,7 +151,7 @@ Then, the sender sends the transaction to the fee payer who will pay for the tra
 When you are a fee payer:
 
 ```java
-Caver caver = new Caver(Caver.BAOBAB_URL);
+Caver caver = new Caver(Caver.DEFAULT_URL);
 
 SingleKeyring feePayerKeyring = KeyringFactory.createFromPrivateKey("0x{privateKey}");
 caver.wallet.add(feePayerKeyring);

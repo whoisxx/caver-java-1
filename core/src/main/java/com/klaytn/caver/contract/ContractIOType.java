@@ -1,21 +1,22 @@
+/*
+ * Copyright 2020 The caver-java Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the “License”);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an “AS IS” BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.klaytn.caver.contract;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
-import org.web3j.abi.datatypes.DynamicArray;
-import org.web3j.abi.datatypes.StaticArray;
-import org.web3j.abi.datatypes.AbiTypes;
-
-import java.io.IOException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.List;
 
 /**
  * Representing a Contract's method or event parameter information.
@@ -35,6 +36,11 @@ public class ContractIOType {
      * True if the field is part of the log’s topics, false if it one of the log’s data segment.
      */
     boolean indexed;
+
+    /**
+     * A tuple type components information.
+     */
+    List<ContractIOType> components;
 
     /**
      * Creates a ContractIOType instance.
@@ -71,6 +77,14 @@ public class ContractIOType {
     }
 
     /**
+     * Getter function for components.
+     * @return List
+     */
+    public List<ContractIOType> getComponents() {
+        return components;
+    }
+
+    /**
      * Getter function for indexed
      * @return indexed.
      */
@@ -100,5 +114,46 @@ public class ContractIOType {
      */
     public void setIndexed(boolean indexed) {
         this.indexed = indexed;
+    }
+
+    /**
+     * Setter function for components
+     * @param components The tuple's components list.
+     */
+    public void setComponents(List<ContractIOType> components) {
+        this.components = components;
+    }
+
+    /**
+     * Returns a type string.
+     * If type string has a tuple, the components of the tuple are listed and returned.
+     * @return String
+     */
+    public String getTypeAsString() {
+        if(getType().contains("tuple")) {
+            String typeString = getComponentAsString();
+            return getType().replace("tuple", "tuple" + typeString);
+        }
+        
+        return getType();
+    }
+
+    private String getComponentAsString() {
+        if(this.getComponents() == null) {
+            return "";
+        }
+
+        StringBuilder stringBuilder = new StringBuilder("(");
+
+        for(int i=0; i<this.getComponents().size(); i++) {
+            ContractIOType ioType = this.components.get(i);
+            stringBuilder.append(ioType.getTypeAsString());
+
+            if(i < this.getComponents().size() -1) {
+                stringBuilder.append(",");
+            }
+        }
+
+        return stringBuilder.append(")").toString();
     }
 }

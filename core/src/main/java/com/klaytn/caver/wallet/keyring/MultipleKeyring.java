@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 The caver-java Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the “License”);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an “AS IS” BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.klaytn.caver.wallet.keyring;
 
 import com.klaytn.caver.account.Account;
@@ -136,17 +152,27 @@ public class MultipleKeyring extends AbstractKeyring{
     }
 
     /**
-     * Return a public key strings
+     * Returns a public key strings.<p>
+     * It returns a public key as a uncompressed format.
      * @return String array
      */
     public String[] getPublicKey() {
+        return getPublicKey(false);
+    }
+
+    /**
+     * Returns a public key strings.
+     * @param compressed Whether in compressed format or not.
+     * @return String array
+     */
+    public String[] getPublicKey(boolean compressed) {
         return Arrays.stream(this.keys).map(key -> {
-            return key.getPublicKey(false);
+            return key.getPublicKey(compressed);
         }).toArray(String[]::new);
     }
 
     /**
-     * returns keys by role. If the key of the role passed as parameter is empty, the default key is returned.
+     * Returns keys by role. If the key of the role passed as parameter is empty, the default key is returned.
      * @param role A number indicating the role of the key. You can use `AccountRoleBased.RoleGroup`.
      * @return PrivateKey Array
      */

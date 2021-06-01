@@ -4,14 +4,14 @@ import com.klaytn.caver.Caver;
 import com.klaytn.caver.account.Account;
 import com.klaytn.caver.account.WeightedMultiSigOptions;
 import com.klaytn.caver.transaction.TransactionHasher;
+import com.klaytn.caver.transaction.TxPropertyBuilder;
 import com.klaytn.caver.transaction.type.FeeDelegatedAccountUpdate;
+import com.klaytn.caver.transaction.type.TransactionType;
 import com.klaytn.caver.wallet.keyring.*;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
 import org.web3j.utils.Numeric;
 
 import java.io.IOException;
@@ -22,20 +22,6 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-        FeeDelegatedAccountUpdateTest.createInstance.class,
-        FeeDelegatedAccountUpdateTest.createInstanceBuilder.class,
-        FeeDelegatedAccountUpdateTest.getRLPEncodingTest.class,
-        FeeDelegatedAccountUpdateTest.signAsFeePayer_OneKeyTest.class,
-        FeeDelegatedAccountUpdateTest.signAsFeePayer_AllKeyTest.class,
-        FeeDelegatedAccountUpdateTest.appendFeePayerSignaturesTest.class,
-        FeeDelegatedAccountUpdateTest.combineSignatureTest.class,
-        FeeDelegatedAccountUpdateTest.getRawTransactionTest.class,
-        FeeDelegatedAccountUpdateTest.getTransactionHashTest.class,
-        FeeDelegatedAccountUpdateTest.getSenderTxHashTest.class,
-        FeeDelegatedAccountUpdateTest.getRLPEncodingForFeePayerSignatureTest.class,
-})
 public class FeeDelegatedAccountUpdateTest {
     static Caver caver = new Caver(Caver.DEFAULT_URL);
 
@@ -133,7 +119,7 @@ public class FeeDelegatedAccountUpdateTest {
         String gas = "0x186a0";
         String nonce = "0x4";
         String gasPrice = "0x5d21dba00";
-        SignatureData[] senderSignatureData = new SignatureData[] {
+        SignatureData[] senderSignatureData = new SignatureData[]{
                 new SignatureData(
                         "0x0fea",
                         "0x31115ed4fdf3cdc9c3071be0c14a992d1ca70b02382b3fadb2428a60f411edcb",
@@ -185,7 +171,7 @@ public class FeeDelegatedAccountUpdateTest {
     static ExpectedData setAccountKeyWeightedMultiSig() {
         String from = "0xed2f77b1962805385512c18ad6d66f3dee3def15";
 
-        String[] publicKeyArr = new String[] {
+        String[] publicKeyArr = new String[]{
                 "0xac1350e8b234a7dac087e4899d5b30687bd153d181faaf4ef11fea7d1acbecf45669b120fd488cf638f7ea83cfe009d85b949aacd51cde80e3162a17aa5160f7",
                 "0x798096c2691444e7c579e04f13c6edeb122b9e35718c041a51b74ccd5f1a086f2e499900717c718a434b15a989d4c33bae18a65f4c1e6b48f8103478cf1e5ef5",
                 "0xaeb9ab821099f4c5d80caafbc0d1980a1a1a701cab8cd0cca8e2f187263a992d5bbf8ea44a1f9bf577175fdccc953c8b8d1bbeeefdabd839be1fcf89f532f470",
@@ -237,7 +223,7 @@ public class FeeDelegatedAccountUpdateTest {
     static ExpectedData setAccountKeyRoleBased() {
         String from = "0xed2f77b1962805385512c18ad6d66f3dee3def15";
 
-        String[][] publicKeyArr = new String[][] {
+        String[][] publicKeyArr = new String[][]{
                 {
                         "0xca112896b2025047790bbcc74f48af339f71390b5335b5e657b50ef8f634fb9fb4f7caf09ec53e8ec0d78253c37d30367631ac44c4b4825b9b5a7bfb6b55b5af",
                         "0xec93c2f3990b61e692467cc2c49b9ff2f595002234c8116bae8807ff0236bd5e99e943b81be279230a218d297069099d873f49b12557ce6ac5bdeee8ddb83665",
@@ -262,7 +248,7 @@ public class FeeDelegatedAccountUpdateTest {
         String gas = "0x61a80";
         String nonce = "0x3";
         String gasPrice = "0x5d21dba00";
-        SignatureData[] senderSignatureData = new SignatureData[] {
+        SignatureData[] senderSignatureData = new SignatureData[]{
                 new SignatureData(
                         "0x0fea",
                         "0xbedc71cfef422e80c32b752b4ebac9ee9e047f3beea07f1929b3f2543dddfd6d",
@@ -369,8 +355,8 @@ public class FeeDelegatedAccountUpdateTest {
     }
 
     public static AbstractKeyring generateRoleBaseKeyring(int[] numArr, String address) {
-        List<String[]> arr = KeyringFactory.generateRoleBasedKeys(numArr, "entropy");
-        return KeyringFactory.createWithRoleBasedKey(address, arr);
+        List<String[]> arr = caver.wallet.keyring.generateRoleBasedKeys(numArr, "entropy");
+        return caver.wallet.keyring.createWithRoleBasedKey(address, arr);
     }
 
     public static class createInstanceBuilder {
@@ -389,6 +375,7 @@ public class FeeDelegatedAccountUpdateTest {
         public void BuilderTest() {
             txObj = builder.build();
             assertNotNull(txObj);
+            assertEquals(TransactionType.TxTypeFeeDelegatedAccountUpdate.toString(), txObj.getType());
         }
 
         @Test
@@ -502,20 +489,19 @@ public class FeeDelegatedAccountUpdateTest {
 
         @Test
         public void createInstance() {
-            FeeDelegatedAccountUpdate txObj = new FeeDelegatedAccountUpdate(
-                    null,
-                    from,
-                    nonce,
-                    gas,
-                    gasPrice,
-                    chainID,
-                    null,
-                    feePayer,
-                    null,
-                    account
+            FeeDelegatedAccountUpdate txObj = caver.transaction.feeDelegatedAccountUpdate.create(
+                    TxPropertyBuilder.feeDelegatedAccountUpdate()
+                            .setFrom(from)
+                            .setNonce(nonce)
+                            .setGas(gas)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setFeePayer(feePayer)
+                            .setAccount(account)
             );
 
             assertNotNull(txObj);
+            assertEquals(TransactionType.TxTypeFeeDelegatedAccountUpdate.toString(), txObj.getType());
         }
 
         @Test
@@ -525,17 +511,15 @@ public class FeeDelegatedAccountUpdateTest {
 
             String from = "invalid Address";
 
-            FeeDelegatedAccountUpdate txObj = new FeeDelegatedAccountUpdate(
-                    null,
-                    from,
-                    nonce,
-                    gas,
-                    gasPrice,
-                    chainID,
-                    null,
-                    feePayer,
-                    null,
-                    account
+            FeeDelegatedAccountUpdate txObj = caver.transaction.feeDelegatedAccountUpdate.create(
+                    TxPropertyBuilder.feeDelegatedAccountUpdate()
+                            .setFrom(from)
+                            .setNonce(nonce)
+                            .setGas(gas)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setFeePayer(feePayer)
+                            .setAccount(account)
             );
         }
 
@@ -546,17 +530,15 @@ public class FeeDelegatedAccountUpdateTest {
 
             String from = null;
 
-            FeeDelegatedAccountUpdate txObj = new FeeDelegatedAccountUpdate(
-                    null,
-                    from,
-                    nonce,
-                    gas,
-                    gasPrice,
-                    chainID,
-                    null,
-                    feePayer,
-                    null,
-                    account
+            FeeDelegatedAccountUpdate txObj = caver.transaction.feeDelegatedAccountUpdate.create(
+                    TxPropertyBuilder.feeDelegatedAccountUpdate()
+                            .setFrom(from)
+                            .setNonce(nonce)
+                            .setGas(gas)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setFeePayer(feePayer)
+                            .setAccount(account)
             );
         }
 
@@ -567,17 +549,15 @@ public class FeeDelegatedAccountUpdateTest {
 
             String gas = "invalid gas";
 
-            FeeDelegatedAccountUpdate txObj = new FeeDelegatedAccountUpdate(
-                    null,
-                    from,
-                    nonce,
-                    gas,
-                    gasPrice,
-                    chainID,
-                    null,
-                    feePayer,
-                    null,
-                    account
+            FeeDelegatedAccountUpdate txObj = caver.transaction.feeDelegatedAccountUpdate.create(
+                    TxPropertyBuilder.feeDelegatedAccountUpdate()
+                            .setFrom(from)
+                            .setNonce(nonce)
+                            .setGas(gas)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setFeePayer(feePayer)
+                            .setAccount(account)
             );
         }
 
@@ -588,17 +568,15 @@ public class FeeDelegatedAccountUpdateTest {
 
             String gas = null;
 
-            FeeDelegatedAccountUpdate txObj = new FeeDelegatedAccountUpdate(
-                    null,
-                    from,
-                    nonce,
-                    gas,
-                    gasPrice,
-                    chainID,
-                    null,
-                    feePayer,
-                    null,
-                    account
+            FeeDelegatedAccountUpdate txObj = caver.transaction.feeDelegatedAccountUpdate.create(
+                    TxPropertyBuilder.feeDelegatedAccountUpdate()
+                            .setFrom(from)
+                            .setNonce(nonce)
+                            .setGas(gas)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setFeePayer(feePayer)
+                            .setAccount(account)
             );
         }
 
@@ -609,17 +587,15 @@ public class FeeDelegatedAccountUpdateTest {
 
             Account account = null;
 
-            FeeDelegatedAccountUpdate txObj = new FeeDelegatedAccountUpdate(
-                    null,
-                    from,
-                    nonce,
-                    gas,
-                    gasPrice,
-                    chainID,
-                    null,
-                    feePayer,
-                    null,
-                    account
+            FeeDelegatedAccountUpdate txObj = caver.transaction.feeDelegatedAccountUpdate.create(
+                    TxPropertyBuilder.feeDelegatedAccountUpdate()
+                            .setFrom(from)
+                            .setNonce(nonce)
+                            .setGas(gas)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setFeePayer(feePayer)
+                            .setAccount(account)
             );
         }
     }
@@ -711,18 +687,19 @@ public class FeeDelegatedAccountUpdateTest {
             PrivateKey sender = new PrivateKey(senderPrivateKey);
             account = Account.createWithAccountKeyPublic(sender.getDerivedAddress(), sender.getPublicKey(false));
 
-            txObj = new FeeDelegatedAccountUpdate.Builder()
-                    .setNonce(nonce)
-                    .setGas(gas)
-                    .setGasPrice(gasPrice)
-                    .setChainId(chainID)
-                    .setFrom(from)
-                    .setSignatures(senderSignature)
-                    .setFeePayer(feePayer)
-                    .setAccount(account)
-                    .build();
+            txObj = caver.transaction.feeDelegatedAccountUpdate.create(
+                    TxPropertyBuilder.feeDelegatedAccountUpdate()
+                            .setNonce(nonce)
+                            .setGas(gas)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setFrom(from)
+                            .setSignatures(senderSignature)
+                            .setFeePayer(feePayer)
+                            .setAccount(account)
+            );
 
-            keyring = KeyringFactory.createWithSingleKey(feePayer, feePayerPrivateKey);
+            keyring = caver.wallet.keyring.createWithSingleKey(feePayer, feePayerPrivateKey);
             klaytnWalletKey = keyring.getKlaytnWalletKey();
         }
 
@@ -750,12 +727,12 @@ public class FeeDelegatedAccountUpdateTest {
         @Test
         public void signAsFeePayer_multipleKey() throws IOException {
             String[] keyArr = {
-                    PrivateKey.generate().getPrivateKey(),
+                    caver.wallet.keyring.generateSingleKey(),
                     feePayerPrivateKey,
-                    PrivateKey.generate().getPrivateKey()
+                    caver.wallet.keyring.generateSingleKey()
             };
 
-            MultipleKeyring keyring = KeyringFactory.createWithMultipleKey(feePayer, keyArr);
+            MultipleKeyring keyring = caver.wallet.keyring.createWithMultipleKey(feePayer, keyArr);
             txObj.signAsFeePayer(keyring, 1);
             assertEquals(1, txObj.getFeePayerSignatures().size());
             assertEquals(expectedRawTx, txObj.getRawTransaction());
@@ -765,20 +742,19 @@ public class FeeDelegatedAccountUpdateTest {
         public void signAsFeePayer_roleBasedKey() throws IOException {
             String[][] keyArr = {
                     {
-                            PrivateKey.generate().getPrivateKey(),
-                            PrivateKey.generate().getPrivateKey(),
-
+                            caver.wallet.keyring.generateSingleKey(),
+                            caver.wallet.keyring.generateSingleKey(),
                     },
                     {
-                            PrivateKey.generate().getPrivateKey()
+                            caver.wallet.keyring.generateSingleKey()
                     },
                     {
-                            PrivateKey.generate().getPrivateKey(),
+                            caver.wallet.keyring.generateSingleKey(),
                             feePayerPrivateKey
                     }
             };
 
-            RoleBasedKeyring roleBasedKeyring = KeyringFactory.createWithRoleBasedKey(keyring.getAddress(), Arrays.asList(keyArr));
+            RoleBasedKeyring roleBasedKeyring = caver.wallet.keyring.createWithRoleBasedKey(keyring.getAddress(), Arrays.asList(keyArr));
             txObj.signAsFeePayer(roleBasedKeyring, 1);
             assertEquals(1, txObj.getFeePayerSignatures().size());
             assertEquals(expectedRawTx, txObj.getRawTransaction());
@@ -789,7 +765,7 @@ public class FeeDelegatedAccountUpdateTest {
             expectedException.expect(IllegalArgumentException.class);
             expectedException.expectMessage("The feePayer address of the transaction is different with the address of the keyring to use.");
 
-            SingleKeyring keyring = KeyringFactory.createWithSingleKey(feePayerPrivateKey, PrivateKey.generate().getPrivateKey());
+            SingleKeyring keyring = caver.wallet.keyring.generate();
 
             txObj.signAsFeePayer(keyring, 0);
         }
@@ -799,7 +775,7 @@ public class FeeDelegatedAccountUpdateTest {
             expectedException.expect(IllegalArgumentException.class);
             expectedException.expectMessage("Invalid index : index must be less than the length of the key.");
 
-            AbstractKeyring keyring = generateRoleBaseKeyring(new int[]{3,3,3}, feePayer);
+            AbstractKeyring keyring = generateRoleBaseKeyring(new int[]{3, 3, 3}, feePayer);
             txObj.signAsFeePayer(keyring, 4);
         }
     }
@@ -831,22 +807,29 @@ public class FeeDelegatedAccountUpdateTest {
 
         @Before
         public void before() {
-            singleKeyring = KeyringFactory.createWithSingleKey(feePayer, feePayerPrivateKey);
-            multipleKeyring = KeyringFactory.createWithMultipleKey(feePayer, KeyringFactory.generateMultipleKeys(8));
-            roleBasedKeyring = KeyringFactory.createWithRoleBasedKey(feePayer, KeyringFactory.generateRolBasedKeys(new int[]{3,4,5}));
+            singleKeyring = caver.wallet.keyring.createWithSingleKey(feePayer, feePayerPrivateKey);
+            multipleKeyring = caver.wallet.keyring.createWithMultipleKey(
+                    feePayer,
+                    caver.wallet.keyring.generateMultipleKeys(8)
+            );
+            roleBasedKeyring = caver.wallet.keyring.createWithRoleBasedKey(
+                    feePayer,
+                    caver.wallet.keyring.generateRolBasedKeys(new int[]{3, 4, 5})
+            );
 
             account = Account.createWithAccountKeyFail(from);
 
-            mTxObj = new FeeDelegatedAccountUpdate.Builder()
-                    .setNonce(nonce)
-                    .setGas(gas)
-                    .setGasPrice(gasPrice)
-                    .setChainId(chainID)
-                    .setFrom(from)
-                    .setSignatures(senderSignature)
-                    .setFeePayer(feePayer)
-                    .setAccount(account)
-                    .build();
+            mTxObj = caver.transaction.feeDelegatedAccountUpdate.create(
+                    TxPropertyBuilder.feeDelegatedAccountUpdate()
+                            .setNonce(nonce)
+                            .setGas(gas)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setFrom(from)
+                            .setSignatures(senderSignature)
+                            .setFeePayer(feePayer)
+                            .setAccount(account)
+            );
         }
 
         @Test
@@ -878,7 +861,7 @@ public class FeeDelegatedAccountUpdateTest {
             expectedException.expect(IllegalArgumentException.class);
             expectedException.expectMessage("The feePayer address of the transaction is different with the address of the keyring to use.");
 
-            SingleKeyring keyring = KeyringFactory.createFromPrivateKey(PrivateKey.generate().getPrivateKey());
+            SingleKeyring keyring = caver.wallet.keyring.generate();
             mTxObj.signAsFeePayer(keyring);
         }
     }
@@ -907,17 +890,17 @@ public class FeeDelegatedAccountUpdateTest {
         public void before() {
             account = Account.createWithAccountKeyFail(from);
 
-            mTxObj = new FeeDelegatedAccountUpdate.Builder()
-                    .setNonce(nonce)
-                    .setGas(gas)
-                    .setGasPrice(gasPrice)
-                    .setChainId(chainID)
-                    .setFrom(from)
-                    .setSignatures(senderSignature)
-                    .setFeePayer(feePayer)
-                    .setAccount(account)
-                    .build();
-
+            mTxObj = caver.transaction.feeDelegatedAccountUpdate.create(
+                    TxPropertyBuilder.feeDelegatedAccountUpdate()
+                            .setNonce(nonce)
+                            .setGas(gas)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setFrom(from)
+                            .setSignatures(senderSignature)
+                            .setFeePayer(feePayer)
+                            .setAccount(account)
+            );
         }
 
 
@@ -952,17 +935,18 @@ public class FeeDelegatedAccountUpdateTest {
         public void appendFeePayerSignatureList_EmptySig() {
             SignatureData emptySignature = SignatureData.getEmptySignature();
 
-            mTxObj = new FeeDelegatedAccountUpdate.Builder()
-                    .setNonce(nonce)
-                    .setGas(gas)
-                    .setGasPrice(gasPrice)
-                    .setChainId(chainID)
-                    .setFrom(from)
-                    .setSignatures(senderSignature)
-                    .setFeePayer(feePayer)
-                    .setAccount(account)
-                    .setFeePayerSignatures(emptySignature)
-                    .build();
+            mTxObj = caver.transaction.feeDelegatedAccountUpdate.create(
+                    TxPropertyBuilder.feeDelegatedAccountUpdate()
+                            .setNonce(nonce)
+                            .setGas(gas)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setFrom(from)
+                            .setSignatures(senderSignature)
+                            .setFeePayer(feePayer)
+                            .setAccount(account)
+                            .setFeePayerSignatures(emptySignature)
+            );
 
             SignatureData signatureData = new SignatureData(
                     Numeric.hexStringToByteArray("0x0fea"),
@@ -994,17 +978,18 @@ public class FeeDelegatedAccountUpdateTest {
             List<SignatureData> list = new ArrayList<>();
             list.add(signatureData1);
 
-            mTxObj = new FeeDelegatedAccountUpdate.Builder()
-                    .setNonce(nonce)
-                    .setGas(gas)
-                    .setGasPrice(gasPrice)
-                    .setChainId(chainID)
-                    .setFrom(from)
-                    .setSignatures(senderSignature)
-                    .setFeePayer(feePayer)
-                    .setAccount(account)
-                    .setFeePayerSignatures(signatureData)
-                    .build();
+            mTxObj = caver.transaction.feeDelegatedAccountUpdate.create(
+                    TxPropertyBuilder.feeDelegatedAccountUpdate()
+                            .setNonce(nonce)
+                            .setGas(gas)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setFrom(from)
+                            .setSignatures(senderSignature)
+                            .setFeePayer(feePayer)
+                            .setAccount(account)
+                            .setFeePayerSignatures(signatureData)
+            );
 
             mTxObj.appendFeePayerSignatures(list);
             assertEquals(2, mTxObj.getFeePayerSignatures().size());
@@ -1032,17 +1017,18 @@ public class FeeDelegatedAccountUpdateTest {
                     Numeric.hexStringToByteArray("0xa3ac51660b8b421bf732ef8148d0d4f19d5e29cb97be6bccb5ae505ebe89eb4a")
             );
 
-            mTxObj = new FeeDelegatedAccountUpdate.Builder()
-                    .setNonce(nonce)
-                    .setGas(gas)
-                    .setGasPrice(gasPrice)
-                    .setChainId(chainID)
-                    .setFrom(from)
-                    .setSignatures(senderSignature)
-                    .setFeePayer(feePayer)
-                    .setAccount(account)
-                    .setFeePayerSignatures(signatureData)
-                    .build();
+            mTxObj = caver.transaction.feeDelegatedAccountUpdate.create(
+                    TxPropertyBuilder.feeDelegatedAccountUpdate()
+                            .setNonce(nonce)
+                            .setGas(gas)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setFrom(from)
+                            .setSignatures(senderSignature)
+                            .setFeePayer(feePayer)
+                            .setAccount(account)
+                            .setFeePayerSignatures(signatureData)
+            );
 
             List<SignatureData> list = new ArrayList<>();
             list.add(signatureData1);
@@ -1072,16 +1058,17 @@ public class FeeDelegatedAccountUpdateTest {
 
         @Test
         public void combineSignatures() {
-            mTxObj = new FeeDelegatedAccountUpdate.Builder()
-                    .setNonce(nonce)
-                    .setFrom(from)
-                    .setGas(gas)
-                    .setGasPrice(gasPrice)
-                    .setChainId(chainID)
-                    .setAccount(account)
-                    .build();
+            mTxObj = caver.transaction.feeDelegatedAccountUpdate.create(
+                    TxPropertyBuilder.feeDelegatedAccountUpdate()
+                            .setNonce(nonce)
+                            .setFrom(from)
+                            .setGas(gas)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setAccount(account)
+            );
 
-            String rlpEncoded = "0x21f872018505d21dba00830186a0949788016d3957e62cc7f3aa7f9f5d801e3277b4eb8201c0f847f845820fe9a05e5922bc693162599cca35416a96f44187a7a0ac4851eddf9ad8ec8359aa8878a03e128291576716d0be1ef5a8dba67eb2056fa1495529a77338d9c7a7b4c5e24a80c4c3018080";
+            String rlpEncoded = "0x21f886018505d21dba00830186a0949788016d3957e62cc7f3aa7f9f5d801e3277b4eb8201c0f847f845820fe9a05e5922bc693162599cca35416a96f44187a7a0ac4851eddf9ad8ec8359aa8878a03e128291576716d0be1ef5a8dba67eb2056fa1495529a77338d9c7a7b4c5e24a940000000000000000000000000000000000000000c4c3018080";
             String combined = mTxObj.combineSignedRawTransactions(Arrays.asList(rlpEncoded));
 
             SignatureData expectedSignatureData = new SignatureData(
@@ -1102,15 +1089,16 @@ public class FeeDelegatedAccountUpdateTest {
                     "0x3e128291576716d0be1ef5a8dba67eb2056fa1495529a77338d9c7a7b4c5e24a"
             );
 
-            mTxObj = new FeeDelegatedAccountUpdate.Builder()
-                    .setNonce(nonce)
-                    .setFrom(from)
-                    .setGas(gas)
-                    .setGasPrice(gasPrice)
-                    .setChainId(chainID)
-                    .setAccount(account)
-                    .setSignatures(senderSignature)
-                    .build();
+            mTxObj = caver.transaction.feeDelegatedAccountUpdate.create(
+                    TxPropertyBuilder.feeDelegatedAccountUpdate()
+                            .setNonce(nonce)
+                            .setFrom(from)
+                            .setGas(gas)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setAccount(account)
+                            .setSignatures(senderSignature)
+            );
 
             String[] rlpEncodedStrings = {
                     "0x21f872018505d21dba00830186a0949788016d3957e62cc7f3aa7f9f5d801e3277b4eb8201c0f847f845820fe9a0dd841ac608f55a20a211599ab73b7cc8cacedb219aca053621b68a7cf1ce1625a055da30e64842b16650ec6fac6972b1344197a299c2f840190bbe01fdc82a447a80c4c3018080",
@@ -1118,7 +1106,7 @@ public class FeeDelegatedAccountUpdateTest {
             };
 
             String combined = mTxObj.combineSignedRawTransactions(Arrays.asList(rlpEncodedStrings));
-            String expectedRLPEncoding = "0x21f90100018505d21dba00830186a0949788016d3957e62cc7f3aa7f9f5d801e3277b4eb8201c0f8d5f845820fe9a05e5922bc693162599cca35416a96f44187a7a0ac4851eddf9ad8ec8359aa8878a03e128291576716d0be1ef5a8dba67eb2056fa1495529a77338d9c7a7b4c5e24af845820fe9a0dd841ac608f55a20a211599ab73b7cc8cacedb219aca053621b68a7cf1ce1625a055da30e64842b16650ec6fac6972b1344197a299c2f840190bbe01fdc82a447af845820feaa0187d11596f3a2c9ef922fee8ebf07aa1c7ce7ae46834c54901436d10b9e0afd8a068094e4e51f2d07b60f14df1ddb75f1afb35ed8061aa51005559beab2cc9cd4c80c4c3018080";
+            String expectedRLPEncoding = "0x21f90114018505d21dba00830186a0949788016d3957e62cc7f3aa7f9f5d801e3277b4eb8201c0f8d5f845820fe9a05e5922bc693162599cca35416a96f44187a7a0ac4851eddf9ad8ec8359aa8878a03e128291576716d0be1ef5a8dba67eb2056fa1495529a77338d9c7a7b4c5e24af845820fe9a0dd841ac608f55a20a211599ab73b7cc8cacedb219aca053621b68a7cf1ce1625a055da30e64842b16650ec6fac6972b1344197a299c2f840190bbe01fdc82a447af845820feaa0187d11596f3a2c9ef922fee8ebf07aa1c7ce7ae46834c54901436d10b9e0afd8a068094e4e51f2d07b60f14df1ddb75f1afb35ed8061aa51005559beab2cc9cd4c940000000000000000000000000000000000000000c4c3018080";
 
             SignatureData[] expectedSignatureData = new SignatureData[]{
                     new SignatureData(
@@ -1148,15 +1136,16 @@ public class FeeDelegatedAccountUpdateTest {
         public void combineSignature_feePayerSignature() {
             String feePayer = "0x1576dfec8c77f984d627ff5e953ab527c30a3904";
 
-            mTxObj = new FeeDelegatedAccountUpdate.Builder()
-                    .setNonce(nonce)
-                    .setFrom(from)
-                    .setGas(gas)
-                    .setGasPrice(gasPrice)
-                    .setFeePayer(feePayer)
-                    .setChainId(chainID)
-                    .setAccount(account)
-                    .build();
+            mTxObj = caver.transaction.feeDelegatedAccountUpdate.create(
+                    TxPropertyBuilder.feeDelegatedAccountUpdate()
+                            .setNonce(nonce)
+                            .setFrom(from)
+                            .setGas(gas)
+                            .setGasPrice(gasPrice)
+                            .setFeePayer(feePayer)
+                            .setChainId(chainID)
+                            .setAccount(account)
+            );
 
             String rlpEncoded = "0x21f886018505d21dba00830186a0949788016d3957e62cc7f3aa7f9f5d801e3277b4eb8201c0c4c3018080941576dfec8c77f984d627ff5e953ab527c30a3904f847f845820feaa06f06eeeb86c6980bf314a3c4c84a9f610d8ed7055e48d3176f8be8fc7c4c0e2ca0562417d4c1653f0e420c63fb427198f636eb5364b9e95626026fdabedcc33eb8";
             String combined = mTxObj.combineSignedRawTransactions(Arrays.asList(rlpEncoded));
@@ -1179,18 +1168,19 @@ public class FeeDelegatedAccountUpdateTest {
                     "0x562417d4c1653f0e420c63fb427198f636eb5364b9e95626026fdabedcc33eb8"
             );
 
-            mTxObj = new FeeDelegatedAccountUpdate.Builder()
-                    .setNonce(nonce)
-                    .setFrom(from)
-                    .setGas(gas)
-                    .setGasPrice(gasPrice)
-                    .setFeePayer(feePayer)
-                    .setChainId(chainID)
-                    .setAccount(account)
-                    .setFeePayerSignatures(feePayerSignatureData)
-                    .build();
+            mTxObj = caver.transaction.feeDelegatedAccountUpdate.create(
+                    TxPropertyBuilder.feeDelegatedAccountUpdate()
+                            .setNonce(nonce)
+                            .setFrom(from)
+                            .setGas(gas)
+                            .setGasPrice(gasPrice)
+                            .setFeePayer(feePayer)
+                            .setChainId(chainID)
+                            .setAccount(account)
+                            .setFeePayerSignatures(feePayerSignatureData)
+            );
 
-            String[] rlpEncodedStrings = new String[] {
+            String[] rlpEncodedStrings = new String[]{
                     "0x21f886018505d21dba00830186a0949788016d3957e62cc7f3aa7f9f5d801e3277b4eb8201c0c4c3018080941576dfec8c77f984d627ff5e953ab527c30a3904f847f845820fe9a080eb1d684765851433b6e91c702500436704a2b74bbe9fb0e237b7486fc86504a048975a10ca36aa7b439dc9e8a6b5cfd715476ed57e43619a5ef8a9266d544ad6",
                     "0x21f886018505d21dba00830186a0949788016d3957e62cc7f3aa7f9f5d801e3277b4eb8201c0c4c3018080941576dfec8c77f984d627ff5e953ab527c30a3904f847f845820fe9a0ec1155a838e74333b6bc2b76bb99098882c3b522e7a850f01151d37b2fac9841a0078a3216312f05e92a732f26fbe084365f37f5523dc1def47c4cea932eaa972a",
             };
@@ -1224,18 +1214,19 @@ public class FeeDelegatedAccountUpdateTest {
 
         @Test
         public void multipleSignature_senderSignature_feePayerSignature() {
-            mTxObj = new FeeDelegatedAccountUpdate.Builder()
-                    .setNonce(nonce)
-                    .setFrom(from)
-                    .setGas(gas)
-                    .setGasPrice(gasPrice)
-                    .setChainId(chainID)
-                    .setAccount(account)
-                    .build();
+            mTxObj = caver.transaction.feeDelegatedAccountUpdate.create(
+                    TxPropertyBuilder.feeDelegatedAccountUpdate()
+                            .setNonce(nonce)
+                            .setFrom(from)
+                            .setGas(gas)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setAccount(account)
+            );
 
 
             String rlpEncodedString = "0x21f90100018505d21dba00830186a0949788016d3957e62cc7f3aa7f9f5d801e3277b4eb8201c0f8d5f845820fe9a05e5922bc693162599cca35416a96f44187a7a0ac4851eddf9ad8ec8359aa8878a03e128291576716d0be1ef5a8dba67eb2056fa1495529a77338d9c7a7b4c5e24af845820fe9a0dd841ac608f55a20a211599ab73b7cc8cacedb219aca053621b68a7cf1ce1625a055da30e64842b16650ec6fac6972b1344197a299c2f840190bbe01fdc82a447af845820feaa0187d11596f3a2c9ef922fee8ebf07aa1c7ce7ae46834c54901436d10b9e0afd8a068094e4e51f2d07b60f14df1ddb75f1afb35ed8061aa51005559beab2cc9cd4c80c4c3018080";
-            SignatureData[] expectedSignatures = new SignatureData[] {
+            SignatureData[] expectedSignatures = new SignatureData[]{
                     new SignatureData(
                             "0x0fe9",
                             "0x5e5922bc693162599cca35416a96f44187a7a0ac4851eddf9ad8ec8359aa8878",
@@ -1257,7 +1248,7 @@ public class FeeDelegatedAccountUpdateTest {
 
             String rlpEncodedStringsWithFeePayerSignatures = "0x21f90114018505d21dba00830186a0949788016d3957e62cc7f3aa7f9f5d801e3277b4eb8201c0c4c3018080941576dfec8c77f984d627ff5e953ab527c30a3904f8d5f845820feaa06f06eeeb86c6980bf314a3c4c84a9f610d8ed7055e48d3176f8be8fc7c4c0e2ca0562417d4c1653f0e420c63fb427198f636eb5364b9e95626026fdabedcc33eb8f845820fe9a080eb1d684765851433b6e91c702500436704a2b74bbe9fb0e237b7486fc86504a048975a10ca36aa7b439dc9e8a6b5cfd715476ed57e43619a5ef8a9266d544ad6f845820fe9a0ec1155a838e74333b6bc2b76bb99098882c3b522e7a850f01151d37b2fac9841a0078a3216312f05e92a732f26fbe084365f37f5523dc1def47c4cea932eaa972a";
 
-            SignatureData[] expectedFeePayerSignatures = new SignatureData[] {
+            SignatureData[] expectedFeePayerSignatures = new SignatureData[]{
                     new SignatureData(
                             "0x0fea",
                             "0x6f06eeeb86c6980bf314a3c4c84a9f610d8ed7055e48d3176f8be8fc7c4c0e2c",
@@ -1293,14 +1284,15 @@ public class FeeDelegatedAccountUpdateTest {
 
             String gas = "0x1000";
 
-            mTxObj = new FeeDelegatedAccountUpdate.Builder()
-                    .setNonce(nonce)
-                    .setFrom(from)
-                    .setGas(gas)
-                    .setGasPrice(gasPrice)
-                    .setChainId(chainID)
-                    .setAccount(account)
-                    .build();
+            mTxObj = caver.transaction.feeDelegatedAccountUpdate.create(
+                    TxPropertyBuilder.feeDelegatedAccountUpdate()
+                            .setNonce(nonce)
+                            .setFrom(from)
+                            .setGas(gas)
+                            .setGasPrice(gasPrice)
+                            .setChainId(chainID)
+                            .setAccount(account)
+            );
 
             String rlpEncoded = "0x21f90114018505d21dba00830186a0949788016d3957e62cc7f3aa7f9f5d801e3277b4eb8201c0c4c3018080941576dfec8c77f984d627ff5e953ab527c30a3904f8d5f845820feaa06f06eeeb86c6980bf314a3c4c84a9f610d8ed7055e48d3176f8be8fc7c4c0e2ca0562417d4c1653f0e420c63fb427198f636eb5364b9e95626026fdabedcc33eb8f845820fe9a080eb1d684765851433b6e91c702500436704a2b74bbe9fb0e237b7486fc86504a048975a10ca36aa7b439dc9e8a6b5cfd715476ed57e43619a5ef8a9266d544ad6f845820fe9a0ec1155a838e74333b6bc2b76bb99098882c3b522e7a850f01151d37b2fac9841a0078a3216312f05e92a732f26fbe084365f37f5523dc1def47c4cea932eaa972a";
             List<String> list = new ArrayList<>();
@@ -1370,7 +1362,7 @@ public class FeeDelegatedAccountUpdateTest {
         }
 
         @Test
-        public void throwException_NotDefined_gasPrice() {
+        public void throwException_NotDefined_GasPrice() {
             expectedException.expect(RuntimeException.class);
             expectedException.expectMessage("gasPrice is undefined. Define gasPrice in transaction or use 'transaction.fillTransaction' to fill values.");
 
@@ -1419,7 +1411,7 @@ public class FeeDelegatedAccountUpdateTest {
         }
 
         @Test
-        public void throwException_NotDefined_gasPrice() {
+        public void throwException_NotDefined_GasPrice() {
             expectedException.expect(RuntimeException.class);
             expectedException.expectMessage("gasPrice is undefined. Define gasPrice in transaction or use 'transaction.fillTransaction' to fill values.");
 
@@ -1469,7 +1461,7 @@ public class FeeDelegatedAccountUpdateTest {
         }
 
         @Test
-        public void throwException_NotDefined_gasPrice() {
+        public void throwException_NotDefined_GasPrice() {
             expectedException.expect(RuntimeException.class);
             expectedException.expectMessage("gasPrice is undefined. Define gasPrice in transaction or use 'transaction.fillTransaction' to fill values.");
 
@@ -1481,7 +1473,7 @@ public class FeeDelegatedAccountUpdateTest {
         }
 
         @Test
-        public void throwException_NotDefined_chainID() {
+        public void throwException_NotDefined_ChainID() {
             expectedException.expect(RuntimeException.class);
             expectedException.expectMessage("chainId is undefined. Define chainId in transaction or use 'transaction.fillTransaction' to fill values.");
 

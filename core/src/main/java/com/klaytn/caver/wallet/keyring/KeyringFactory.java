@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 The caver-java Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the “License”);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an “AS IS” BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.klaytn.caver.wallet.keyring;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,17 +35,17 @@ import java.util.stream.Collectors;
 public class KeyringFactory {
 
     /**
-     * Generates a keyring instance.
-     * @return Keyring
+     * Generates a single type of keyring instance.
+     * @return SingleKeyring
      */
     public static SingleKeyring generate() {
         return KeyringFactory.generate(null);
     }
 
     /**
-     * Generates a keyring instance with entropy.
+     * Generates a single type of keyring instance with entropy.
      * @param entropy A random string to create keyring.
-     * @return Keyring
+     * @return SingleKeyring
      */
     public static SingleKeyring generate(String entropy) {
         PrivateKey privateKey = PrivateKey.generate(entropy);
@@ -114,7 +130,7 @@ public class KeyringFactory {
      * Creates a single type of keyring instance.
      * @param address The address of keyring.
      * @param key The key of keyring.
-     * @return Keyring
+     * @return SingleKeyring
      */
     public static SingleKeyring create(String address, String key) {
         return createWithSingleKey(address, key);
@@ -124,7 +140,7 @@ public class KeyringFactory {
      * Creates a multiple type of keyring instance.
      * @param address The address of keyring.
      * @param keys The key list of keyring.
-     * @return Keyring
+     * @return MultipleKeyring
      */
     public static MultipleKeyring create(String address, String[] keys) {
         return createWithMultipleKey(address, keys);
@@ -134,16 +150,16 @@ public class KeyringFactory {
      * Creates a roleBased type of keyring instance.
      * @param address The address of keyring.
      * @param keys The key list of keyring.
-     * @return Keyring
+     * @return RoleBasedKeyring
      */
     public static RoleBasedKeyring create(String address, List<String[]> keys) {
         return createWithRoleBasedKey(address, keys);
     }
 
     /**
-     * Creates a keyring instance with private key.
+     * Creates a single type of keyring instance with private key.
      * @param key A private key string.
-     * @return Keyring
+     * @return SingleKeyring
      */
     public static SingleKeyring createFromPrivateKey(String key) {
         if(Utils.isKlaytnWalletKey(key)) {
@@ -157,9 +173,9 @@ public class KeyringFactory {
     }
 
     /**
-     * Creates a keyring instance from KlaytnWalletKey string.
+     * Creates a single type of keyring instance from KlaytnWalletKey string.
      * @param klaytnWalletKey A key string in KlaytnWalletKey format.
-     * @return Keyring
+     * @return SingleKeyring
      */
     public static SingleKeyring createFromKlaytnWalletKey(String klaytnWalletKey) {
         String[] parsedKey = Utils.parseKlaytnWalletKey(klaytnWalletKey);
@@ -174,7 +190,7 @@ public class KeyringFactory {
      * Creates a single type of keyring instance from address and private key string.
      * @param address An address of keyring.
      * @param key A private key string.
-     * @return Keyring
+     * @return SingleKeyring
      */
     public static SingleKeyring createWithSingleKey(String address, String key) {
         if(Utils.isKlaytnWalletKey(key)) {
@@ -189,7 +205,7 @@ public class KeyringFactory {
      * Creates a multiple type of keyring instance from address and private key strings.
      * @param address An address of keyring.
      * @param multipleKey An array of private key strings.
-     * @return Keyring
+     * @return MultipleKeyring
      */
     public static MultipleKeyring createWithMultipleKey(String address, String[] multipleKey) {
         if(multipleKey.length > WeightedMultiSigOptions.MAX_COUNT_WEIGHTED_PUBLIC_KEY) {
@@ -207,7 +223,7 @@ public class KeyringFactory {
      * Create a roleBased type of keyring instance from address and private key strings.
      * @param address An address of keyring.
      * @param roleBasedKey A List of private key strings.
-     * @return Keyring
+     * @return RoleBasedKeyring
      */
     public static RoleBasedKeyring createWithRoleBasedKey(String address, List<String[]> roleBasedKey) {
         if(roleBasedKey.size() > AccountKeyRoleBased.ROLE_GROUP_COUNT) {
@@ -236,7 +252,7 @@ public class KeyringFactory {
      * Decrypts a KeyStore json string and returns a keyring instance.
      * @param keyStore The encrypted keystore to decrypt.
      * @param password The password to use for decryption.
-     * @return Keyring
+     * @return AbstractKeyring
      * @throws CipherException
      * @throws IOException
      */
@@ -251,7 +267,7 @@ public class KeyringFactory {
      * Decrypts a keystore v3 or v4 and returns a keyring instance.
      * @param keystore The encrypted keystore to decrypt.
      * @param password The password to use for decryption.
-     * @return Keyring
+     * @return AbstractKeyring
      * @throws CipherException It throws when cipher operation has failed.
      */
     public static AbstractKeyring decrypt(KeyStore keystore, String password) throws CipherException{

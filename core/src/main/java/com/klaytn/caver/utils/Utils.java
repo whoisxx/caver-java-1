@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 The caver-java Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the “License”);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an “AS IS” BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.klaytn.caver.utils;
 
 import com.klaytn.caver.wallet.keyring.SignatureData;
@@ -18,21 +34,40 @@ public class Utils {
     public static final int LENGTH_ADDRESS_STRING = 40;
     public static final int LENGTH_PRIVATE_KEY_STRING = 64;
 
+    public static final String DEFAULT_ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+
     /**
      * Check if string has address format.
-     * @param input An address string.
+     * @param address An address string.
      * @return boolean
      */
-    public static boolean isAddress(String input) {
-        String cleanInput = Numeric.cleanHexPrefix(input);
+    public static boolean isAddress(String address) {
+        Pattern baseAddrPattern = Pattern.compile("^(0x)?[0-9a-f]{40}$", Pattern.CASE_INSENSITIVE);
+        Pattern lowerCase = Pattern.compile("^(0x|0X)?[0-9a-f]{40}$");
+        Pattern upperCase = Pattern.compile("^(0x|0X)?[0-9A-F]{40}$");
 
-        try {
-            Numeric.toBigIntNoPrefix(cleanInput);
-        } catch (NumberFormatException e) {
+        //check if it has the basic requirements of an address.
+        if(!baseAddrPattern.matcher(address).matches()) {
             return false;
         }
 
-        return cleanInput.length() == LENGTH_ADDRESS_STRING && isHex(input);
+        //check if it's ALL lowercase or ALL upppercase
+        if(lowerCase.matcher(address).matches() || upperCase.matcher(address).matches()) {
+            return true;
+        }
+
+        //check checksum address
+        return checkAddressChecksum(address);
+    }
+
+    /**
+     * Check if address has valid checksum.
+     * @param address An address
+     * @return boolean
+     */
+    public static boolean checkAddressChecksum(String address) {
+        address = address.replaceFirst("0X", "0x");
+        return (Keys.toChecksumAddress(address).equals(Utils.addHexPrefix(address)));
     }
 
     /**

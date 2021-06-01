@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 The caver-java Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the “License”);
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an “AS IS” BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.klaytn.caver.transaction.type;
 
 import com.klaytn.caver.rpc.Klay;
@@ -20,7 +36,6 @@ import java.util.List;
  * Please refer to https://docs.klaytn.com/klaytn/design/transactions/fee-delegation#txtypefeedelegatedsmartcontractexecution to see more detail.
  */
 public class FeeDelegatedSmartContractExecution extends AbstractFeeDelegatedTransaction {
-
     /**
      * The account address that will receive the transferred value.
      */
@@ -45,7 +60,7 @@ public class FeeDelegatedSmartContractExecution extends AbstractFeeDelegatedTran
         String input;
 
         public Builder() {
-            super(TransactionType.TxTypeSmartContractExecution.toString());
+            super(TransactionType.TxTypeFeeDelegatedSmartContractExecution.toString());
         }
 
         public Builder setTo(String to) {
@@ -127,8 +142,8 @@ public class FeeDelegatedSmartContractExecution extends AbstractFeeDelegatedTran
     }
 
     /**
-     * Decodes a RLP-encoded FeeDelegatedSmartContractExecution string.
-     * @param rlpEncoded RLP-encoded FeeDelegatedSmartContractExecution string.
+     * Decodes a RLP-encoded FeeDelegatedSmartContractExecution byte array.
+     * @param rlpEncoded RLP-encoded FeeDelegatedSmartContractExecution byte array.
      * @return FeeDelegatedSmartContractExecution
      */
     public static FeeDelegatedSmartContractExecution decode(byte[] rlpEncoded) {
