@@ -70,7 +70,7 @@ build_test: &build_test
     name: "Build"
     command: |
         ./gradlew clean
-        ./gradlew build --debug -x :android_instrumented_test:build
+        ./gradlew build --debug -x :android_instrumented_test:build -x test
 
 build_test_android: &build_test_android
   run:
@@ -79,9 +79,17 @@ build_test_android: &build_test_android
     command: |
       ./gradlew clean
       ./gradlew build --debug -x :android_instrumented_test:build -x test
-      ./gradlew connectedDebugAndroidTest --debug --stacktrace
+      # ./gradlew connectedDebugAndroidTest --debug --stacktrace
 
 jobs:
+  docs_test:
+    <<: *machine_ubuntu
+    steps:
+      - checkout
+      - run:
+          name: "Docs Test"
+          command: ./gradlew javadoc
+
   unit_test:
     <<: *machine_ubuntu
     steps:
@@ -91,7 +99,7 @@ jobs:
       - *check_test_network
       - run:
           name: "Test"
-          command: ./gradlew test
+          command: ./gradlew test -x :android_instrumented_test:test --debug
       - store_test_results:
           path: core/build/test-results/test
 
@@ -115,6 +123,9 @@ jobs:
     steps:
       - checkout
       - *setup_android_test_files
+      - *pull_klaytn_image
+      - *start_test_network
+      - *check_test_network
       - run:
           name: "Change to Android version"
           command: |
@@ -163,14 +174,22 @@ jobs:
     steps:
       - checkout
       - run:
-          name: "Check rc version"
+          name: "Change to Android version"
           command: |
+            version=$(.circleci/version.sh)
+            sed -i "s/version '.*'/version '${version}-android'/" build.gradle 
+            sed -i "s/java.util.concurrent.CompletableFuture/java8.util.concurrent.CompletableFuture/" core/src/test/java/com/klaytn/caver/legacy/scenario/FastTransactionManagerIT.java
+
             if [ -z "$CIRCLE_TAG" ]; then
               echo "this is not RC version"
             else
-              sed -i "s/version '.*'/version '${CIRCLE_TAG:1}'/" build.gradle
-              awk '/version '\''/' build.gradle
+              echo "trigger CIRCLE_TAG $CIRCLE_TAG"
+              sed -i "s/version '.*'/version '${CIRCLE_TAG:1}-android'/" build.gradle
+              sed -i "s/java.util.concurrent.CompletableFuture/java8.util.concurrent.CompletableFuture/" core/src/test/java/com/klaytn/caver/legacy/scenario/FastTransactionManagerIT.java
             fi
+
+            awk '/version '\''/' build.gradle
+            awk '/ext.web3jVersion = '\''/' build.gradle
       - *build_test_android
 
   tag_verify:
@@ -284,7 +303,7 @@ jobs:
               version=v$(.circleci/version.sh)
 
               echo "Publishing a major release! version=$version"
-              ./gradlew clean build --stacktrace --debug
+              ./gradlew build --debug -x :android_instrumented_test:build
               ./gradlew clean publish --stacktrace --debug
               ./gradlew closeAndReleaseRepository --stacktrace --debug
 
@@ -318,34 +337,56 @@ workflows:
   version: 2
   workflow_build_deploy:
     jobs:
+    - docs_test:
+        filters:
+          branches:
+            ignore:
+              - /release\/.*/
+              - master
+          tags:
+            only:
+              - /^v[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+.*/
+              - /^v[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+.*/
     - unit_test:
         filters:
           branches:
             ignore:
               - /release\/.*/
               - master
-
-    - unit_test_andriod:
+          tags:
+            only:
+              - /^v[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+.*/
+              - /^v[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+.*/
+    - unit_test_android:
         filters:
           branches:
             ignore:
               - /release\/.*/
               - master
-
+          tags:
+            only:
+              - /^v[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+.*/
+              - /^v[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+.*/
     - build_test:
         filters:
           branches:
             ignore:
               - /release\/.*/
               - master
-
+          tags:
+            only:
+              - /^v[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+.*/
+              - /^v[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+.*/
     - build_test_android:
         filters:
           branches:
             ignore:
               - /release\/.*/
               - master
-
+          tags:
+            only:
+              - /^v[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+.*/
+              - /^v[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+.*/
     - tag_verify:
         filters:
           tags:
@@ -381,6 +422,9 @@ workflows:
           - tagger_verify
           - unit_test
           - unit_test_android
+          - build_test
+          - build_test_android
+          - docs_test
         filters:
           tags: 
             only: /^v[0-9]+\.[0-9]+\.[0-9]+.*/
@@ -393,6 +437,9 @@ workflows:
           - tagger_verify
           - unit_test
           - unit_test_android
+          - build_test
+          - build_test_android
+          - docs_test
         filters:
           tags:
             only: /^v[0-9]+\.[0-9]+\.[0-9]+.*/
