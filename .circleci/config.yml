@@ -95,7 +95,6 @@ build_test_android: &build_test_android
     command: |
       ./gradlew clean
       ./gradlew build --debug -x :android_instrumented_test:build -x test
-      # ./gradlew connectedDebugAndroidTest --debug --stacktrace
 
 check_android_version: &check_android_version
   run:
@@ -184,7 +183,9 @@ jobs:
             adb shell settings put global transition_animation_scale 0.0
             adb shell settings put global animator_duration_scale 0.0
       - *adb_logging
-      - *build_test_android
+      - run:
+          name: Run android unit test
+          command: ./gradlew connectedDebugAndroidTest --debug --stacktrace
       - store_test_results:
           path: android_instrumented_test/build/outputs/androidTest-results/connected
       - store_artifacts:
